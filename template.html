@@ -4,6 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ subject }} — {{ challenge_title }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         /* ===== CSS VARIABLES ===== */
         :root {
@@ -20,7 +23,7 @@
             --text-muted: #555;
             --border-light: #C2CBD6;
             --border-table: #A8B4C0;
-            --border-input: #777;
+            --border-input: #888;
             --border-dotted: #AAA;
             --red: #B91C1C;
         }
@@ -37,7 +40,7 @@
         }
 
         body {
-            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', 'Nanum Gothic', 'NanumGothic', 'Dotum', 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Noto Sans KR', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Nanum Gothic', 'NanumGothic', 'Dotum', 'Helvetica Neue', Arial, sans-serif;
             font-size: 9.5pt;
             color: var(--text-primary);
             line-height: 1.5;
@@ -52,7 +55,7 @@
             width: 210mm;
             height: auto;
             min-height: 297mm;
-            padding: 12mm 12mm 18mm 12mm;
+            padding: 12mm 15mm 18mm 15mm;
             box-sizing: border-box;
             page-break-after: always;
             break-after: always;
@@ -273,44 +276,67 @@
         }
 
         .section-title {
-            font-size: 12pt;
-            font-weight: bold;
-            color: var(--primary);
-            border-bottom: 0.8mm solid var(--accent);
+            font-size: 14pt;
+            font-weight: 800;
+            color: #333;
+            border-bottom: 0.7mm solid #333;
             padding-bottom: 0.8mm;
             display: inline-block;
-            margin-bottom: 1.5mm;
+            margin-bottom: 2mm;
+            letter-spacing: 0.2mm;
         }
 
         .section-title.title-LG {
-            font-size: 11pt;
+            font-size: 13pt;
         }
 
         .section-title.title-MD {
-            font-size: 10pt;
+            font-size: 12.5pt;
         }
 
         .section-title.title-SM {
-            font-size: 9.5pt;
+            font-size: 12pt;
         }
 
+        /* ===== HIERARCHY: section-title(14pt) > STEP(10.5pt) > PART(9pt) > 문제번호 ===== */
         .step-badge {
-            font-size: 8pt;
-            color: var(--text-muted);
-            margin-top: 2.5mm;
-            margin-bottom: 0.5mm;
-            letter-spacing: 0.25mm;
+            display: block;
+            font-size: 10.5pt;
+            font-weight: bold;
+            color: #444;
+            margin-top: 3mm;
+            margin-bottom: 1mm;
+            letter-spacing: 0.3mm;
+        }
+
+        /* Stage 7-1 STEP 2 위 여백 축소 */
+        .page-stage-7 .content-block + .content-block .step-badge {
+            margin-top: 0;
+        }
+        .page-stage-7 .page-content {
+            gap: 1.5mm;
+        }
+
+        .part-badge {
+            display: block;
+            font-size: 9pt;
+            font-weight: bold;
+            color: #555;
+            margin-top: 2mm;
+            margin-bottom: 0.8mm;
+            padding-left: 0;
+            letter-spacing: 0.2mm;
         }
 
         .step-title {
-            font-size: 9pt;
+            font-size: 9.5pt;
             font-weight: bold;
-            text-decoration: underline;
+            color: var(--text-primary);
             margin-bottom: 1.5mm;
         }
 
         .step-number {
-            color: var(--accent);
+            color: #333;
             font-weight: bold;
         }
 
@@ -332,12 +358,14 @@
         }
 
         .passage-sm {
-            line-height: 1.4;
+            line-height: 1.5;
+            font-size: 10pt;
         }
 
         .passage-xs {
-            line-height: 1.35;
+            line-height: 1.45;
             padding: 2mm 3mm;
+            font-size: 10pt;
         }
 
         .passage-xxs {
@@ -346,7 +374,12 @@
         }
 
         .passage-wide {
-            line-height: 3.5;
+            line-height: 2.8;
+            font-size: 12pt;
+        }
+
+        .page-stage-7 .passage-xs {
+            font-size: 9pt;
         }
 
         .passage-md {
@@ -354,13 +387,13 @@
         }
 
         .input-line {
-            border-bottom: 0.25mm solid var(--border-input);
+            border-bottom: 0.4mm solid var(--border-input);
             min-width: 26mm;
             display: inline-block;
         }
 
         .input-line-block {
-            border-bottom: 0.25mm solid var(--border-input);
+            border-bottom: 0.4mm solid var(--border-input);
             width: 100%;
             display: block;
             height: 5mm;
@@ -368,7 +401,7 @@
         }
 
         .input-line-dotted {
-            border-bottom: 0.25mm dotted var(--border-dotted);
+            border-bottom: 0.4mm solid var(--border-input);
             min-width: 32mm;
             display: inline-block;
             height: 3mm;
@@ -381,7 +414,7 @@
 
 
         .input-xs {
-            min-width: 15.5mm;
+            min-width: 11mm;
         }
 
         .input-sm {
@@ -477,6 +510,82 @@
             font-size: 8pt;
         }
 
+        .sol-step-block {
+            font-size: 8pt;
+            margin-bottom: 1mm;
+        }
+
+        .sol-step-block .sol-sub {
+            display: block;
+            padding-left: 11mm;
+            margin-top: 0.3mm;
+        }
+
+        .sol-step-tbl {
+            border-collapse: collapse;
+            font-size: 8pt;
+            margin-top: 0.5mm;
+        }
+
+        .sol-step-tbl td {
+            vertical-align: top;
+            padding: 0.3mm 0;
+        }
+
+        .sol-step-tbl .sol-step-label {
+            white-space: nowrap;
+            font-weight: bold;
+            padding-right: 1mm;
+        }
+
+        .sol-step-tbl .sol-step-line {
+            display: block;
+            margin-bottom: 0.3mm;
+        }
+
+        .gram-ans-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 1mm;
+            margin-bottom: 1.2mm;
+        }
+
+        .gram-ans-line {
+            flex: 1;
+            border-bottom: 0.4mm solid var(--border-input);
+            align-self: flex-end;
+            min-height: 4mm;
+        }
+
+        .page-stage-9 .page-content {
+            --block-gap: 5mm;
+        }
+
+        .page-stage-9 .content-block {
+            margin-top: 1.5mm;
+        }
+
+        .cm-step3-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 1.5mm;
+            margin-bottom: 1.5mm;
+        }
+
+        .cm-step3-mark {
+            flex: 0 0 auto;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .cm-step3-line {
+            flex: 1 1 auto;
+            min-width: 0;
+            border-bottom: 0.4mm solid var(--border-input);
+            align-self: flex-end;
+            min-height: 4mm;
+        }
+
         .sol-warn {
             font-size: 7.5pt;
             color: var(--red);
@@ -496,12 +605,12 @@
         }
 
         .sent-english {
-            font-size: 8pt;
-            line-height: 3.5;
+            font-size: 10pt;
+            line-height: 3.2;
         }
 
         .sent-korean {
-            border-bottom: 0.25mm dotted var(--border-dotted);
+            border-bottom: 0.25mm solid var(--border-input);
             height: 7mm;
         }
 
@@ -520,7 +629,8 @@
         .flow-2col {
             columns: 2;
             column-gap: 4mm;
-            column-fill: balance;
+            column-fill: auto;
+            height: 220mm;
             font-size: 8pt;
             line-height: 1.35;
         }
@@ -628,11 +738,12 @@
         }
 
         .sketch-box {
-            border: 0.25mm dashed var(--border-dotted);
-            border-radius: 1mm;
+            border: none;
+            border-top: 0.4mm dashed var(--border-dotted);
+            border-radius: 0;
             min-height: 22mm;
             margin-bottom: 3mm;
-            padding: 2mm;
+            padding: 3mm 2mm 2mm;
         }
 
         .sketch-label {
@@ -655,6 +766,13 @@
             line-height: 1.35;
         }
 
+        .opt-row-stack {
+            display: block;
+            margin-bottom: 2.5mm;
+            font-size: 9pt;
+            line-height: 1.4;
+        }
+
         .opt-text {
             flex-shrink: 0;
         }
@@ -665,6 +783,15 @@
             font-size: 7.5pt;
             margin-left: 2mm;
             white-space: nowrap;
+        }
+
+        .opt-memo-indent {
+            display: block;
+            padding-left: 4mm;
+            margin-top: 0.5mm;
+            color: var(--text-muted);
+            font-size: 8pt;
+            font-weight: normal;
         }
 
         .ans-row {
@@ -759,7 +886,7 @@
 
         .word-table-row-fixed {
             display: flex;
-            align-items: center;
+            align-items: flex-end;
             flex-wrap: nowrap;
             white-space: nowrap;
             gap: 1mm;
@@ -772,20 +899,40 @@
 
         .word-table-group {
             display: flex;
-            align-items: center;
+            align-items: flex-end;
             flex: 1 1 0;
             min-width: 0;
             gap: 0.5mm;
+        }
+
+        .word-table-row-fixed {
+            min-height: 5mm;
+            margin-bottom: 0.3mm;
+        }
+
+        .word-table-row-fixed .input-line-block {
+            margin: 0;
+        }
+
+        /* 네모 박스 안 라벨:____ 행은 margin-top 적용 금지 */
+        .gram-ans-cell > *,
+        .gram-err-cell > *,
+        .vocerr-card > *,
+        .word-table-cell > *,
+        .dict-box > * {
+            margin-top: 0;
         }
 
         .word-table-row-fixed .input-line {
             min-width: 0;
         }
 
-        .word-table-line {
+        .word-table-line,
+        .input-line.word-table-line {
             display: inline-block;
-            flex: 1;
+            flex: 1 1 0;
             min-width: 0;
+            width: auto;
         }
 
         .word-table-line-full {
@@ -800,16 +947,20 @@
             height: 3.5mm;
         }
 
+        .input-line-h13 {
+            height: 3.5mm;
+        }
+
         .word-table-line-h10 {
-            height: 2.5mm;
+            height: 3.5mm;
         }
 
         .word-table-line-h17 {
-            height: 4.5mm;
+            height: 3.5mm;
         }
 
         .word-table-line-full-h10 {
-            height: 2.5mm;
+            height: 3.5mm;
         }
 
         .word-table-line-min45 {
@@ -902,7 +1053,7 @@
         .gram-ans-cell {
             border: 0.25mm solid var(--border-light);
             border-radius: 0.8mm;
-            padding: 0.8mm 1.5mm;
+            padding: 1.5mm 2mm;
             vertical-align: top;
         }
 
@@ -918,6 +1069,26 @@
             border-radius: 0.8mm;
             padding: 1.5mm 2mm;
             vertical-align: top;
+        }
+
+        .gram-err-cell > p:first-child {
+            white-space: nowrap;
+            overflow: hidden;
+            display: flex;
+            align-items: flex-end;
+            gap: 0.8mm;
+            font-size: 8pt;
+        }
+
+        .gram-err-cell > p:first-child .input-line,
+        .gram-err-cell > p:first-child .input-line.input-xs {
+            flex: 1 1 0;
+            min-width: 0;
+        }
+
+        .gram-err-cell > p:first-child .grammar-number,
+        .gram-err-cell > p:first-child .grammar-option {
+            flex: 0 0 auto;
         }
 
         .gram-note {
@@ -955,9 +1126,38 @@
 
         .vocerr-tbl {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 1mm;
             font-size: 8pt;
             margin-top: 1mm;
+            table-layout: fixed;
+        }
+
+        .vocerr-card {
+            border: 0.25mm solid var(--border-light);
+            border-radius: 0.8mm;
+            padding: 1.2mm 2mm;
+            vertical-align: top;
+            width: 33.33%;
+        }
+
+        .vocerr-card-row {
+            display: flex;
+            align-items: baseline;
+            gap: 1.5mm;
+            margin: 0.5mm 0;
+        }
+
+        .vocerr-card-label {
+            white-space: nowrap;
+            font-weight: bold;
+            color: var(--text-secondary);
+        }
+
+        .vocerr-card-line {
+            flex: 1;
+            border-bottom: 0.25mm solid var(--border-input);
+            min-height: 4mm;
         }
 
         .vocerr-label {
@@ -1054,11 +1254,14 @@
 
         .answer-page {
             columns: 2;
-            column-gap: 5mm;
-            column-fill: balance;
+            column-gap: 6mm;
+            column-fill: auto;
+            column-rule: 0.2mm solid var(--border-light);
+            height: 245mm;
             font-size: 8pt;
             line-height: 1.4;
             overflow-wrap: break-word;
+            display: block;
         }
 
         .answer-stage,
@@ -1087,8 +1290,8 @@
             border-bottom: none;
         }
 
-        .answer-block p,
-        .ablock p:not(.ast):not(.answer-stage) {
+        .answer-block p:not(.answer-commentary),
+        .ablock p:not(.ast):not(.answer-stage):not(.answer-commentary) {
             padding: 0.5mm 0;
             border-bottom: 0.15mm solid #eee;
             font-size: 7.5pt;
@@ -1103,7 +1306,7 @@
             font-size: 7.5pt;
             color: var(--text-secondary);
             border-left: 0.5mm solid var(--border-light);
-            padding-left: 1mm;
+            padding-left: 2.5mm;
             margin: 0.5mm 0 1mm;
         }
 
@@ -1294,7 +1497,7 @@
                 height: auto;
                 min-height: 297mm;
                 margin: 0 auto 20px;
-                padding: 6mm 12mm 6mm 12mm;
+                padding: 6mm 15mm 6mm 15mm;
                 box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
             }
         }
@@ -1314,14 +1517,17 @@
                 padding-bottom: 6mm;
             }
 
-            .page:nth-child(odd) {
-                padding-left: 16mm;
-                padding-right: 8mm;
+            .page {
+                padding-left: 15mm;
+                padding-right: 15mm;
             }
 
-            .page:nth-child(even) {
-                padding-left: 8mm;
-                padding-right: 16mm;
+            /* 인쇄 시 column-fill:auto 영역의 height 미세조정 (overflow → 빈 페이지 방지) */
+            .flow-2col {
+                height: 210mm;
+            }
+            .answer-page {
+                height: 230mm;
             }
 
             * {
@@ -1489,8 +1695,9 @@
                     <tr class="word-table-row">
                         {% for col in range(3) %}
                         <td class="word-table-cell">
-                            <p class="word-table-row"><span>단어:</span><span
-                                    class="input-line input-line-w70 input-line-h13"></span>
+                            <p class="word-table-row word-table-row-fixed">
+                                <b class="word-table-bold">단어:</b>
+                                <span class="input-line word-table-line input-line-h13"></span>
                             </p>
                             <p class="word-table-row word-table-row-fixed">
                                 <b class="word-table-bold">뜻</b>
@@ -1556,19 +1763,20 @@
             <div class="content-block">
                 <div class="section-title-row mt4">
                     <div class="section-title title-LG">Stage 2 해석 예습</div>
-                    <span class="fs-75 text-muted">※ 모르는 단어 → 형광펜 / 해석 안 되는 문장 → ★표시</span>
+                    <span class="fs-75 text-muted">※ 모르는 단어 → <mark>형광펜</mark> / 해석 안 되는 문장 → ★표시</span>
                 </div>
                 <div class="passage passage-xs p-dense lh-175">{{ passage }}</div>
                 <div class="mt8">
-                    <p class="text-bold mb2 fs-10">형광친 단어 사전검색 후 정리하기</p>
-                    <p class="text-small text-muted mb4"><span class="text-bold">Step 1.</span> 형광 친 단어 옮겨 적기 → <span
+                    <p class="text-bold mb2 fs-10"><mark>형광펜</mark> 친 단어 사전검색 후 정리하기</p>
+                    <p class="text-small text-muted mb4"><span class="text-bold">Step 1.</span> <mark>형광펜</mark> 친 단어 옮겨 적기 → <span
                             class="text-bold">Step 2.</span> 사전 검색 후 뜻/유의어 정리</p>
                     <table class="word-table word-table-spacious">
                         <tr class="word-table-row word-table-row-nobreak">
                             {% for col in range(3) %}
                             <td class="word-table-cell word-table-cell-light">
-                                <p class="word-table-row"><span>단어:</span><span
-                                        class="input-line input-line-w70 input-line-h13"></span>
+                                <p class="word-table-row word-table-row-fixed">
+                                    <b class="word-table-bold">단어:</b>
+                                    <span class="input-line word-table-line input-line-h13"></span>
                                 </p>
                                 <p class="word-table-row word-table-row-fixed">
                                     <b class="word-table-bold">뜻</b>
@@ -1688,7 +1896,7 @@
                 <div class="checklist-title">☑ 수업 직후 체크리스트 - Stage 4</div>
                 <table class="checklist-table">
                     <tr>
-                        <td class="checklist-step"><span class="step-number">Step 1.</span> 주제문 찾기 — 형광 치고 직접 쓰기</td>
+                        <td class="checklist-step"><span class="step-number">Step 1.</span> 주제문 찾기 — <mark>형광펜</mark> 치고 직접 쓰기</td>
                         <td class="checklist-checks">{{ check_group() }}</td>
                         <td class="checklist-step"><span class="step-number">Step 2.</span> 선지 확인 — 주제와 가장 유사한 선지 찾기
                         </td>
@@ -1701,9 +1909,6 @@
             <div class="content-block">
                 <div class="section-title title-LG mt4">Stage 4 수업 직후 정리</div>
                 <div class="passage passage-sm p-dense">{{ topic_passage }}</div>
-                <div class="sketch-box mt4">
-                    <p class="sketch-label">구조화하세요</p>
-                </div>
             </div>
             <div class="content-block">
                 <p class="step-badge">STEP 1</p>
@@ -1716,20 +1921,23 @@
                 <p class="step-badge">STEP 2</p>
                 <p class="step-title">주제와 가장 유사한 내용 찾기</p>
                 {% for opt in topic_options %}
-                <div class="opt-row">
+                <div class="opt-row-stack">
                     <span class="opt-text">{{ opt }}</span>
-                    <span class="opt-memo">→ 오답정리: <span class="input-line-dotted"></span></span>
+                    <span class="opt-memo-indent">→ 오답정리:</span>
                 </div>{% endfor %}
                 <p class="ans-row">답: <span class="input-line input-ans"></span></p>
+                <div class="sketch-box mt6">
+                    <p class="sketch-label">구조화하세요</p>
+                </div>
             </div>
         </div>
         <div class="page-foot">
             <div class="sol">
                 <p class="sol-title">[주제 찾기 솔루션]</p>
                 <div class="sol-steps">
-                    <div class="sol-step">• ⚠ 주제문 선지에서 <strong>추론적 사고 금지!</strong> 글에서 <strong>언급되지 않은 내용은 오답</strong>
+                    <div class="sol-step">⚠ 주제문 선지에서 <strong>추론적 사고 금지!</strong> 글에서 <strong>언급되지 않은 내용은 오답</strong>
                     </div>
-                    <div class="sol-step">① 지문 내 <strong>주제문을 다시 형광</strong> 치기 / 주제문 직접 쓰세요.</div>
+                    <div class="sol-step">① 지문 내 <strong>주제문을 다시 <mark>형광펜</mark></strong> 치기 / 주제문 직접 쓰세요.</div>
                     <div class="sol-step">② 그 내용과 가장 유사한 비유적/문맥적 내용을 찾으세요.</div>
                 </div>
             </div>
@@ -1815,7 +2023,7 @@
                     <p class="flow-order-ans mt6">{% for _ in full_order_blocks %}( &nbsp; ){% if not loop.last %}-{%
                         endif
                         %}{% endfor %}</p>
-                    <p class="flow-err-note">틀리면, 정답 기호를 ( )에 적고 오른쪽에 문장 내용을 한국말로 한 줄 요약하세요.</p>
+                    <p class="flow-err-note">틀리면, 정답 기호를 ( )에 적고 위쪽에 문장 내용을 한국말로 한 줄 요약하세요.</p>
                     {% for label, text in full_order_blocks %}
                     <p class="flow-err-row">( &nbsp;&nbsp; ) : <span class="input-line input-80p"></span></p>
                     {% endfor %}
@@ -1824,14 +2032,22 @@
                         <p class="fs-8 mb2">• 순서/삽입이 틀렸다면 <strong>Stage 4 구조 정리로
                                 돌아가세요.</strong>
                         </p>
-                        <div class="sol-steps">
-                            <div class="sol-step"><strong>[순서]</strong> ① 첫 문장 찾기 → 지문 인식 → 핵심내용 상기 ② 연결 단서(관사·지시어·접속사)로
-                                순서 연결 →
-                                전체 흐름 확인
-                            </div>
-                            <div class="sol-step"><strong>[삽입]</strong> ① 삽입 문장의 핵심어·연결사 파악 ② 앞뒤 문장 논리 흐름 확인 → 삽입 위치 결정
-                            </div>
-                        </div>
+                        <table class="sol-step-tbl">
+                            <tr>
+                                <td class="sol-step-label">[순서]</td>
+                                <td>
+                                    <span class="sol-step-line">① 첫 문장 찾기 → 지문 인식 → 핵심내용 상기</span>
+                                    <span class="sol-step-line">② 연결 단서(관사·지시어·접속사)로 순서 연결 → 전체 흐름 확인</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="sol-step-label">[삽입]</td>
+                                <td>
+                                    <span class="sol-step-line">① 삽입 문장의 핵심어·연결사 파악</span>
+                                    <span class="sol-step-line">② 앞뒤 문장 논리 흐름 확인 → 삽입 위치 결정</span>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -1868,9 +2084,9 @@
                 <p class="step-badge">STEP 2</p>
                 <p class="step-title">그 내용과 같은 선지 찾기 (관련 유의어 + <span class="color-accent">비유적 표현</span> 주의!)</p>
                 {% for opt in blank_options %}
-                <div class="opt-row">
+                <div class="opt-row-stack">
                     <span class="opt-text">{{ opt }}</span>
-                    <span class="opt-memo">→ 오답정리: <span class="input-line-dotted"></span></span>
+                    <span class="opt-memo-indent">→ 오답정리:</span>
                 </div>{% endfor %}
                 <p class="ans-row">답: <span class="input-line input-ans"></span></p>
             </div>
@@ -1883,7 +2099,7 @@
                     <div class="sol-step">② 그 내용과 같은 선지를 찾으세요. (유의어 + <strong>비유적 표현</strong> 주의!)</div>
                 </div>
                 <p class="mt4 fs-8">③ 틀린 선지 <u>단어 정리</u> <strong>꼭</strong> 할 것. &nbsp; 원문 단어: <span
-                        class="input-line input-32"></span> / 선지의 같은 의미 표현: 같은 형광펜으로 체크!</p>
+                        class="input-line input-32"></span> / 선지의 같은 의미 표현: 같은 <mark>형광펜</mark>으로 체크!</p>
             </div>
         </div>
     </div>
@@ -1904,47 +2120,28 @@
                 <p class="step-badge">STEP 1</p>
                 <p class="step-title">어법 포인트 확인</p>
                 <p class="mb4 fs-85">아래 어법 문제를 순서대로 풀어보세요. 각 표현의 정답 근거를 반드시 확인하고 기록하세요.</p>
-                <p class="step-badge">PART 1</p>
+                <p class="part-badge">PART 1</p>
                 <p class="mb2 fs-85 gram-note">기본적인 문장구조를 표시하여 <strong>정답의 근거를 분석</strong>해보기</p>
                 <div class="passage passage-xs p-dense">{{ grammar_bracket_passage }}</div>
-                <p class="step-badge mt4">PART 2</p>
+                <p class="part-badge mt4">PART 2</p>
                 <p class="mb2 fs-85">각 번호에 해당하는 답을 <strong>'영어'</strong>로 작성</p>
+                {% set gram_ans_cols = 5 if grammar_bracket_count > 12 else 4 %}
                 <table class="gram-ans-tbl">
-                    {% for i in range(0, grammar_bracket_count, 4) %}
+                    {% for i in range(0, grammar_bracket_count, gram_ans_cols) %}
                     <tr class="bi-avoid">
-                        <td class="gram-ans-cell">
-                            <p class="word-table-row-fixed"><span class="grammar-number word-table-bold">({{ i+1
-                                    }})</span><span class="input-line word-table-line"></span></p>
-                            <p class="word-table-row-fixed text-muted fs-75"><span class="word-table-bold">틀린
-                                    이유:</span><span class="input-line word-table-line"></span></p>
-                            <p class="word-table-row-fixed text-muted fs-75"><span class="word-table-bold">문법
-                                    바로잡기:</span><span class="input-line word-table-line"></span></p>
-                        </td>
-                        {% if i+1 < grammar_bracket_count %}<td class="gram-ans-cell">
-                            <p class="word-table-row-fixed"><span class="grammar-number word-table-bold">({{ i+2
-                                    }})</span><span class="input-line word-table-line"></span></p>
-                            <p class="word-table-row-fixed text-muted fs-75"><span class="word-table-bold">틀린
-                                    이유:</span><span class="input-line word-table-line"></span></p>
-                            <p class="word-table-row-fixed text-muted fs-75"><span class="word-table-bold">문법
-                                    바로잡기:</span><span class="input-line word-table-line"></span></p>
-                            </td>{% else %}<td></td>{% endif %}
-                            {% if i+2 < grammar_bracket_count %}<td class="gram-ans-cell">
-                                <p class="word-table-row-fixed"><span class="grammar-number word-table-bold">({{ i+3
-                                        }})</span><span class="input-line word-table-line"></span></p>
-                                <p class="word-table-row-fixed text-muted fs-75"><span class="word-table-bold">틀린
-                                        이유:</span><span class="input-line word-table-line"></span></p>
-                                <p class="word-table-row-fixed text-muted fs-75"><span class="word-table-bold">문법
-                                        바로잡기:</span><span class="input-line word-table-line"></span></p>
-                                </td>{% else %}<td></td>{% endif %}
-                                {% if i+3 < grammar_bracket_count %}<td class="gram-ans-cell">
-                                    <p class="word-table-row-fixed"><span class="grammar-number word-table-bold">({{ i+4
-                                            }})</span><span class="input-line word-table-line"></span></p>
-                                    <p class="word-table-row-fixed text-muted fs-75"><span class="word-table-bold">틀린
-                                            이유:</span><span class="input-line word-table-line"></span></p>
-                                    <p class="word-table-row-fixed text-muted fs-75"><span class="word-table-bold">문법
-                                            바로잡기:</span><span class="input-line word-table-line"></span></p>
-                                    </td>{% else %}<td></td>{% endif %}
-                    </tr>{% endfor %}
+                        {% for j in range(gram_ans_cols) %}
+                            {% if i + j < grammar_bracket_count %}
+                            <td class="gram-ans-cell">
+                                <p class="gram-ans-row"><span class="grammar-number word-table-bold">({{ i+j+1 }})</span><span class="gram-ans-line"></span></p>
+                                <p class="word-table-row-fixed text-muted fs-75"><span class="word-table-bold">틀린 이유:</span><span class="input-line word-table-line"></span></p>
+                                <p class="word-table-row-fixed text-muted fs-75"><span class="word-table-bold">문법 바로잡기:</span><span class="input-line word-table-line"></span></p>
+                            </td>
+                            {% else %}
+                            <td></td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
                 </table>
             </div>
             <div class="content-block">
@@ -1955,51 +2152,23 @@
                 <!-- <p class="mb2 fs-85">기본적인 문장구조를 표시하여 <strong>정답의 근거</strong>를 분석해보기</p> -->
                 <div class="passage passage-xs p-dense">{{ grammar_error_passage }}</div>
                 <p class="mt6 mb2 fs-85"><strong>답안 작성 및 오답정리</strong> (올바른 표현으로 고치지 못한 경우에도 무조건 오답정리)</p>
+                {% set gram_err_cols = 5 if grammar_error_count > 12 else 4 %}
                 <table class="gram-err-tbl">
-                    {% for i in range(0, grammar_error_count, 4) %}
+                    {% for i in range(0, grammar_error_count, gram_err_cols) %}
                     <tr class="bi-avoid">
-                        <td class="gram-err-cell">
-                            <p><span class="grammar-number">({{ i+1 }})</span> <span
-                                    class="input-line input-xs input-primary"></span> <span
-                                    class="grammar-option">→</span> <span
-                                    class="input-line input-xs input-accent"></span></p>
-                            <p class="word-table-row-fixed text-muted mt2 fs-85"><span class="word-table-bold">틀린
-                                    이유:</span><span class="input-line word-table-line"></span></p>
-                            <p class="word-table-row-fixed text-muted fs-85"><span class="word-table-bold">문법
-                                    바로잡기:</span><span class="input-line word-table-line"></span></p>
-                        </td>
-                        {% if i+1 < grammar_error_count %}<td class="gram-err-cell">
-                            <p><span class="grammar-number">({{ i+2 }})</span> <span
-                                    class="input-line input-xs input-primary"></span> <span
-                                    class="grammar-option">→</span> <span
-                                    class="input-line input-xs input-accent"></span></p>
-                            <p class="word-table-row-fixed text-muted mt2 fs-85"><span class="word-table-bold">틀린
-                                    이유:</span><span class="input-line word-table-line"></span></p>
-                            <p class="word-table-row-fixed text-muted fs-85"><span class="word-table-bold">문법
-                                    바로잡기:</span><span class="input-line word-table-line"></span></p>
-                            </td>{% else %}<td></td>{% endif %}
-                            {% if i+2 < grammar_error_count %}<td class="gram-err-cell">
-                                <p><span class="grammar-number">({{ i+3 }})</span> <span
-                                        class="input-line input-xs input-primary"></span> <span
-                                        class="grammar-option">→</span> <span
-                                        class="input-line input-xs input-accent"></span></p>
-                                <p class="word-table-row-fixed text-muted mt2 fs-85"><span class="word-table-bold">틀린
-                                        이유:</span><span class="input-line word-table-line"></span></p>
-                                <p class="word-table-row-fixed text-muted fs-85"><span class="word-table-bold">문법
-                                        바로잡기:</span><span class="input-line word-table-line"></span></p>
-                                </td>{% else %}<td></td>{% endif %}
-                                {% if i+3 < grammar_error_count %}<td class="gram-err-cell">
-                                    <p><span class="grammar-number">({{ i+4 }})</span> <span
-                                            class="input-line input-xs input-primary"></span> <span
-                                            class="grammar-option">→</span> <span
-                                            class="input-line input-xs input-accent"></span></p>
-                                    <p class="word-table-row-fixed text-muted mt2 fs-85"><span
-                                            class="word-table-bold">틀린 이유:</span><span
-                                            class="input-line word-table-line"></span></p>
-                                    <p class="word-table-row-fixed text-muted fs-85"><span class="word-table-bold">문법
-                                            바로잡기:</span><span class="input-line word-table-line"></span></p>
-                                    </td>{% else %}<td></td>{% endif %}
-                    </tr>{% endfor %}
+                        {% for j in range(gram_err_cols) %}
+                            {% if i + j < grammar_error_count %}
+                            <td class="gram-err-cell">
+                                <p><span class="grammar-number">({{ i+j+1 }})</span> <span class="input-line input-xs input-primary"></span> <span class="grammar-option">→</span> <span class="input-line input-xs input-accent"></span></p>
+                                <p class="word-table-row-fixed text-muted fs-75"><span class="word-table-bold">틀린 이유:</span><span class="input-line word-table-line"></span></p>
+                                <p class="word-table-row-fixed text-muted fs-75"><span class="word-table-bold">문법 바로잡기:</span><span class="input-line word-table-line"></span></p>
+                            </td>
+                            {% else %}
+                            <td></td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
                 </table>
             </div>
         </div>
@@ -2053,7 +2222,7 @@
         <div class="page-content">
             <div class="content-block">
                 <div class="section-title title-MD mt4">Stage 8 어휘 (괄호 속 올바른 표현 고르기)</div>
-                <p class="text-bold mb4 fs-10">Part A. 괄호 속 올바른 어휘 고르기</p>
+                <p class="part-badge">PART A. 괄호 속 올바른 어휘 고르기</p>
                 <div class="passage passage-md p-dense">{{ vocab_advanced_passage }}</div>
                 <table class="vocanswer-tbl">
                     <tr>{% for n in range(1, vocab_parta_answers|length + 1) %}{% if n == 6 %}</tr>
@@ -2065,32 +2234,38 @@
                     <p class="part-divider-label">Part A 오답 - 틀린 단어 다시 정리</p>
                     <table class="vocerr-tbl">
                         <tr>
-                            <td class="vocerr-label">단어:</td>
-                            <td class="vocerr-ans"></td>
-                            <td class="vocerr-label">뜻:</td>
-                            <td class="vocerr-ans"></td>
-                            <td class="vocerr-sep"></td>
-                            <td class="vocerr-label">단어:</td>
-                            <td class="vocerr-ans"></td>
-                            <td class="vocerr-label">뜻:</td>
-                            <td class="vocerr-ans"></td>
+                            <td class="vocerr-card">
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">단어:</span><span class="vocerr-card-line"></span></div>
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">뜻:</span><span class="vocerr-card-line"></span></div>
+                            </td>
+                            <td class="vocerr-card">
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">단어:</span><span class="vocerr-card-line"></span></div>
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">뜻:</span><span class="vocerr-card-line"></span></div>
+                            </td>
+                            <td class="vocerr-card">
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">단어:</span><span class="vocerr-card-line"></span></div>
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">뜻:</span><span class="vocerr-card-line"></span></div>
+                            </td>
                         </tr>
                         <tr>
-                            <td class="vocerr-label">단어:</td>
-                            <td class="vocerr-ans"></td>
-                            <td class="vocerr-label">뜻:</td>
-                            <td class="vocerr-ans"></td>
-                            <td class="vocerr-sep"></td>
-                            <td class="vocerr-label">단어:</td>
-                            <td class="vocerr-ans"></td>
-                            <td class="vocerr-label">뜻:</td>
-                            <td class="vocerr-ans"></td>
+                            <td class="vocerr-card">
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">단어:</span><span class="vocerr-card-line"></span></div>
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">뜻:</span><span class="vocerr-card-line"></span></div>
+                            </td>
+                            <td class="vocerr-card">
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">단어:</span><span class="vocerr-card-line"></span></div>
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">뜻:</span><span class="vocerr-card-line"></span></div>
+                            </td>
+                            <td class="vocerr-card">
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">단어:</span><span class="vocerr-card-line"></span></div>
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">뜻:</span><span class="vocerr-card-line"></span></div>
+                            </td>
                         </tr>
                     </table>
                 </div>
             </div>
             <div class="content-block">
-                <p class="text-bold mb4 fs-10">Part B. 올바른 유의어에 O 표시 (모두 고르시오)</p>
+                <p class="part-badge">PART B. 올바른 유의어에 O 표시 (모두 고르시오)</p>
                 {% for item in vocab_partb %}
                 <p class="mb4 fs-95">{{ loop.index }}. <strong>{{ item.word }}</strong>: &nbsp; {{ item.choices }}</p>{%
                 endfor
@@ -2099,26 +2274,32 @@
                     <p class="part-divider-label">Part B 오답 - 틀린 단어 다시 정리</p>
                     <table class="vocerr-tbl">
                         <tr>
-                            <td class="vocerr-label">단어:</td>
-                            <td class="vocerr-ans"></td>
-                            <td class="vocerr-label">뜻:</td>
-                            <td class="vocerr-ans"></td>
-                            <td class="vocerr-sep"></td>
-                            <td class="vocerr-label">단어:</td>
-                            <td class="vocerr-ans"></td>
-                            <td class="vocerr-label">뜻:</td>
-                            <td class="vocerr-ans"></td>
+                            <td class="vocerr-card">
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">단어:</span><span class="vocerr-card-line"></span></div>
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">뜻:</span><span class="vocerr-card-line"></span></div>
+                            </td>
+                            <td class="vocerr-card">
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">단어:</span><span class="vocerr-card-line"></span></div>
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">뜻:</span><span class="vocerr-card-line"></span></div>
+                            </td>
+                            <td class="vocerr-card">
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">단어:</span><span class="vocerr-card-line"></span></div>
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">뜻:</span><span class="vocerr-card-line"></span></div>
+                            </td>
                         </tr>
                         <tr>
-                            <td class="vocerr-label">단어:</td>
-                            <td class="vocerr-ans"></td>
-                            <td class="vocerr-label">뜻:</td>
-                            <td class="vocerr-ans"></td>
-                            <td class="vocerr-sep"></td>
-                            <td class="vocerr-label">단어:</td>
-                            <td class="vocerr-ans"></td>
-                            <td class="vocerr-label">뜻:</td>
-                            <td class="vocerr-ans"></td>
+                            <td class="vocerr-card">
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">단어:</span><span class="vocerr-card-line"></span></div>
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">뜻:</span><span class="vocerr-card-line"></span></div>
+                            </td>
+                            <td class="vocerr-card">
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">단어:</span><span class="vocerr-card-line"></span></div>
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">뜻:</span><span class="vocerr-card-line"></span></div>
+                            </td>
+                            <td class="vocerr-card">
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">단어:</span><span class="vocerr-card-line"></span></div>
+                                <div class="vocerr-card-row"><span class="vocerr-card-label">뜻:</span><span class="vocerr-card-line"></span></div>
+                            </td>
                         </tr>
                     </table>
                 </div>
@@ -2176,19 +2357,15 @@
             </div>
             <div class="content-block">
                 <p class="step-badge">STEP 3</p>
-                <p class="text-bold mb2 fs-8">오답정리</p>
-                <table class="cm-table">
-                    <tr>
-                        <td class="cm-col cm-col-pr15">{% for _ in range(6) %}<p class="word-table-row-fixed mb2"><span
-                                    class="word-table-bold">( &nbsp; )</span><span
-                                    class="input-line word-table-line"></span></p>{% endfor
-                            %}</td>
-                        <td class="cm-col">{% for _ in range(6) %}<p class="word-table-row-fixed mb2"><span
-                                    class="word-table-bold">( &nbsp; )</span><span
-                                    class="input-line word-table-line"></span></p>{% endfor
-                            %}</td>
-                    </tr>
-                </table>
+                <div class="part-divider">
+                    <p class="part-divider-label">오답 - 틀린 문장 다시 정리</p>
+                    <table class="cm-table">
+                        <tr>
+                            <td class="cm-col cm-col-pr15">{% for _ in range(6) %}<p class="cm-step3-row"><span class="cm-step3-mark">(&nbsp;&nbsp;&nbsp;&nbsp;)</span><span class="cm-step3-line"></span></p>{% endfor %}</td>
+                            <td class="cm-col">{% for _ in range(6) %}<p class="cm-step3-row"><span class="cm-step3-mark">(&nbsp;&nbsp;&nbsp;&nbsp;)</span><span class="cm-step3-line"></span></p>{% endfor %}</td>
+                        </tr>
+                    </table>
+                </div>
             </div>
         </div>
         <div class="page-foot">
