@@ -924,7 +924,8 @@ def step3_blank(passage: str, passage_dir: Path) -> dict:
   "blank_answer_korean": "빈칸 정답 내용 한국어",
   "blank_options": ["① ...", "② ...", ... "⑫ ..."],
   "blank_correct": ["②", "③", "⑤", ...],
-  "blank_wrong": ["① ...(①에 대한 한글 해석 문장)", "④ ...(④에 대한 한글 해석 문장)", ...]
+  "blank_wrong": ["①", "④", ...]
+  "blank_wrong_translation": ["① ①에 대한 한글 해석 문장", "④ ④에 대한 한글 해석 문장", ...]
 }}"""
 
     data = call_claude_json(SYS_JSON, prompt, max_tokens=3000)
@@ -1798,7 +1799,7 @@ def step8_answers(all_data: dict, passage_dir: Path) -> dict:
     # Lv.6
     s3 = all_data.get("step3", {})
     correct = ', '.join(s3.get("blank_correct", []))
-    wrong = '\n'.join(s3.get("blank_wrong", []))
+    wrong = '\n'.join(s3.get("blank_wrong_translation", []))
 
     blocks.append(f'<div class="ablock"><p class="ast">Stage 6 빈칸 추론</p>'
                    f'<p>[STEP 2]\n> 정답: {correct}</p>'
