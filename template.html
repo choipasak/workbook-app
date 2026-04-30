@@ -557,6 +557,16 @@
             min-height: 4mm;
         }
 
+        /* 연속 페이지에서 체크리스트/섹션 타이틀/페이지 안내 숨김 */
+        .page[data-continuation="true"] .checklist,
+        .page[data-continuation="true"] .checklist-full,
+        .page[data-continuation="true"] .section-title,
+        .page[data-continuation="true"] .section-title-row,
+        .page[data-continuation="true"] .ans-heading,
+        .page[data-continuation="true"] .stage-notice {
+            display: none;
+        }
+
         .page-stage-9 .page-content {
             --block-gap: 5mm;
         }
@@ -630,7 +640,7 @@
             columns: 2;
             column-gap: 4mm;
             column-fill: auto;
-            height: 220mm;
+            height: 210mm;
             font-size: 8pt;
             line-height: 1.35;
         }
@@ -1257,7 +1267,7 @@
             column-gap: 6mm;
             column-fill: auto;
             column-rule: 0.2mm solid var(--border-light);
-            height: 245mm;
+            height: 230mm;
             font-size: 8pt;
             line-height: 1.4;
             overflow-wrap: break-word;
@@ -1522,21 +1532,17 @@
                 padding-right: 15mm;
             }
 
-            /* 인쇄 시 column-fill:auto 영역의 height 미세조정 (overflow → 빈 페이지 방지) */
-            .flow-2col {
-                height: 210mm;
-            }
-            .answer-page {
-                height: 230mm;
-            }
+            /* JS 페이지네이션이 screen/print 동일 height 기준으로 동작 → print 별도 override 불필요 */
 
             * {
                 outline: none !important;
             }
 
+            /* orphans/widows 2는 컬럼/페이지마다 dead space를 누적시켜
+               JS에서 측정한 스크린 레이아웃과 인쇄 레이아웃 사이 큰 차이 발생 → 1로 완화 */
             p {
-                orphans: 2;
-                widows: 2;
+                orphans: 1;
+                widows: 1;
             }
 
             :root {
@@ -2436,6 +2442,143 @@
         </div>
     </div>
     {% endif %}
+
+    {# ============================================================
+       D안: 콘텐츠 overflow 시 자동 페이지네이션
+       - .answer-page (정답 및 해설) / .flow-2col (Stage 5)
+       - 컨테이너 capacity = clientHeight × column-count
+       - 자식들 높이 누적이 capacity 초과 시 다음 .page 로 이동
+       ============================================================ #}
+    <script>
+    (function () {
+        'use strict';
+
+        function isOverflowing(container) {
+            // CSS 다단 레이아웃에서 scrollWidth/scrollHeight 는 실제 overflow를 정확히 반환하지 않음
+            // → 자식들의 실측 높이 합산 vs 컨테이너 capacity (height × column-count) 로 비교
+
+            // 1차: 일반 scroll 기반 검지 (다단 외 컨테이너 또는 명백한 가로 overflow)
+            if (container.scrollWidth > container.offsetWidth + 1) return true;
+
+            // 2차: 다단 레이아웃 capacity 검지
+            var colCount = parseInt(getComputedStyle(container).columnCount, 10) || 1;
+            if (colCount <= 1) {
+                return container.scrollHeight > container.offsetHeight + 1;
+            }
+            var capacity = container.clientHeight * colCount;
+            var totalChildHeight = 0;
+            for (var i = 0; i < container.children.length; i++) {
+                var child = container.children[i];
+                var st = getComputedStyle(child);
+                var mt = parseFloat(st.marginTop) || 0;
+                var mb = parseFloat(st.marginBottom) || 0;
+                totalChildHeight += child.offsetHeight + mt + mb;
+            }
+            return totalChildHeight > capacity;
+        }
+
+        function paginateContainer(container, selector) {
+            if (!isOverflowing(container)) return null;
+
+            var page = container.closest('.page');
+            if (!page) return null;
+            if (container.children.length <= 1) return null; // 자식 1개면 분할 의미 없음
+
+            // 페이지 깊은 복제 후 새 컨테이너 비우기
+            var newPage = page.cloneNode(true);
+            newPage.classList.remove('page-last');
+            newPage.dataset.continuation = 'true';
+
+            var newContainer = newPage.querySelector(selector);
+            if (!newContainer) return null;
+            while (newContainer.firstChild) newContainer.removeChild(newContainer.firstChild);
+
+            // 새 페이지를 원본 다음에 삽입 (DOM에 들어가야 layout 측정 가능)
+            page.parentNode.insertBefore(newPage, page.nextSibling);
+
+            // 마지막 자식을 하나씩 새 컨테이너로 옮기며 overflow 사라질 때까지
+            var safety = 500;
+            while (safety-- > 0 && isOverflowing(container)) {
+                var lastChild = container.lastElementChild;
+                if (!lastChild) break;
+
+                // 순서 보존: 새 컨테이너의 맨 앞으로 이동
+                if (newContainer.firstChild) {
+                    newContainer.insertBefore(lastChild, newContainer.firstChild);
+                } else {
+                    newContainer.appendChild(lastChild);
+                }
+            }
+
+            // 아무것도 못 옮겼다면 (단일 거대 자식) 새 페이지 제거
+            if (newContainer.children.length === 0) {
+                page.parentNode.removeChild(newPage);
+                return null;
+            }
+
+            return newContainer;
+        }
+
+        function paginate(selector) {
+            var queue = Array.prototype.slice.call(document.querySelectorAll(selector));
+            var safety = 50;
+            while (queue.length > 0 && safety-- > 0) {
+                var container = queue.shift();
+                var newContainer = paginateContainer(container, selector);
+                if (newContainer) queue.push(newContainer);
+            }
+        }
+
+        function ensurePageLast() {
+            var allPages = document.querySelectorAll('.page');
+            if (allPages.length === 0) return;
+            // 모든 .page 에서 .page-last 제거 후 마지막 페이지에만 부여
+            for (var i = 0; i < allPages.length; i++) {
+                allPages[i].classList.remove('page-last');
+            }
+            allPages[allPages.length - 1].classList.add('page-last');
+        }
+
+        function paginateAll() {
+            paginate('.answer-page');
+            paginate('.flow-2col');
+            ensurePageLast();
+        }
+
+        // 폰트(Noto Sans KR) 비동기 로딩 + 모든 리소스 로드 완료 후 페이지네이션 실행
+        // → fallback 폰트로 잘못 측정 → 폰트 로드 후 reflow → overflow 재발 문제 방지
+        function whenReady() {
+            var fontsReady = (document.fonts && document.fonts.ready)
+                ? document.fonts.ready
+                : Promise.resolve();
+            var loadReady = (document.readyState === 'complete')
+                ? Promise.resolve()
+                : new Promise(function (resolve) {
+                    window.addEventListener('load', resolve);
+                });
+            return Promise.all([fontsReady, loadReady]);
+        }
+
+        whenReady().then(paginateAll);
+
+        // 안전 재시도: 폰트/레이아웃이 늦게 안착되는 경우 대비
+        setTimeout(paginateAll, 800);
+        setTimeout(paginateAll, 2000);
+
+        // 인쇄 직전에도 다시 검증 (screen→print 레이아웃 차이로 추가 overflow 발생 시 처리)
+        window.addEventListener('beforeprint', paginateAll);
+
+        // matchMedia('print') 사용 가능한 브라우저 (일부 Chrome 등)
+        if (window.matchMedia) {
+            var mq = window.matchMedia('print');
+            if (typeof mq.addEventListener === 'function') {
+                mq.addEventListener('change', function (e) {
+                    if (e.matches) paginateAll();
+                });
+            }
+        }
+    })();
+    </script>
 
 </body>
 
