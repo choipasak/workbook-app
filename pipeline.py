@@ -7,10 +7,10 @@ PIPELINE_VERSION = "v10"
 STEP_VERSIONS = {
     "step1_basic": "v3",
     "step2_order": "v3",
-    "step3_blank": "v2",
-    "step4_topic": "v2",
-    "step5_grammar": "v3",
-    "step6_vocab_content": "v2",
+    "step3_blank": "v3",
+    "step4_topic": "v3",
+    "step5_grammar": "v4",
+    "step6_vocab_content": "v3",
     "step7_writing": "v3",
     "step8_answers": "v4",
     "secret_note_a": "v1",
@@ -699,6 +699,7 @@ JSON 형식:
 }}"""
     
     data = call_claude_json(SYS_JSON, prompt, max_tokens=4096)
+    data.setdefault("full_order_blocks", [])
     
     # 5지 선다 고정 -> 정답의 번호에 선지 내용 붙이기
     order_answer_dict = {
@@ -709,7 +710,7 @@ JSON 형식:
             "⑤": "⑤ (B)-(C)-(A)"
         }
     
-    order_answer_value = data["order_answer"]
+    order_answer_value = data.get("order_answer")
     logger.debug(f"\nDEBUG | 고정 선지 답 CHECK\n{order_answer_value}\n")
     if order_answer_value is None:
         raise ValueError(f"Stage 5 - A 정답값에 오류 발생 | 오류로 return된 값: {str(data['order_answer'])}")
@@ -1865,7 +1866,7 @@ def step8_answers(all_data: dict, passage_dir: Path) -> dict:
                   '<p class="ast">Stage 6 빈칸 추론</p>'
                    f'<p>[STEP 2]<br>정답: {correct}</p>'
                    '<p>[오답 선지 해석]</p>'
-                   f'<ul>{stage6_wrong}</ul>'
+                   f'{stage6_wrong}'
                    '</div>')
 
     # Lv.7-1 (step1 / step2 정답 3단/2단 나열)
@@ -1953,11 +1954,11 @@ def step8_answers(all_data: dict, passage_dir: Path) -> dict:
           '<p>[STEP 2 - Part A. 한국어]</p>'
           f'<p>정답: {correct_numbers_kor}</p>'
           '<p>[오답 선지 해설 및 정답]</p>'
-          f'<ul>{stage9_wrong_kor}</ul>'
+          f'{stage9_wrong_kor}'
           '<p>[STEP 2 - Part B. English]</p>'
           f'<p>정답: {correct_numbers_eng}</p>'
           '<p>[오답 선지 해설 및 정답]</p>'
-          f'<ul>{stage9_wrong_eng}</ul>'
+          f'{stage9_wrong_eng}'
           '</div>'
       )
 
