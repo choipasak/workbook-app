@@ -1604,7 +1604,7 @@ def step6_vocab_content(passage: str, passage_dir: Path) -> dict:
   "content_match_kr_answer": ["②", "③", "⑤", ...],
   "content_match_kr_wrong": ["① ...", "④ ...", "⑥ ...", ...],
   "content_match_en": ["① ...", "② ...", "③ ...", "④ ...", "⑤ ...", "⑥ ...", "⑦ ...", "⑧ ...", "⑨ ...", "⑩ ..."],
-  "content_match_en_answer": ["②", "④", ...]
+  "content_match_en_answer": ["②", "④", ...],
   "content_match_en_wrong": ["① ...", "③ ...", ...]
 }}"""
 
@@ -1815,17 +1815,17 @@ def step8_answers(all_data: dict, passage_dir: Path) -> dict:
     blocks = []
 
     # Lv.4(구 Stage 7의 정답: 정답 번호들+오답의 해석)
-    stage7_data = all_data.get("step7")
-    correct_number = stage7_data.get("topic_correct")
+    stage4_data = all_data.get("step4") or {}
+    correct_number = ', '.join(stage4_data.get("topic_correct") or [])
     wrong_translation = ''.join(
-        f'<li>{w}</li>' for w in stage7_data.get("topic_wrong_translation", [])
+        f'<li>{w}</li>' for w in (stage4_data.get("topic_wrong_translation") or [])
     )
 
     blocks.append(
         '<div class="ablock">'
         '<p class="ast">Stage 4 수업 직후 정리</p>'
-        f'<p>[STEP 1 - 주제문 직접 쓰기]<br> 정답: {correct_number}</p>'
-        f'<p>[오답 선지 해석]</p>'
+        f'<p>[STEP 1 - 주제문 직접 쓰기]<br>정답: {correct_number}</p>'
+        '<p>[오답 선지 해석]</p>'
         f'<ul>{wrong_translation}</ul>'
         '</div>'
     )
@@ -1836,15 +1836,16 @@ def step8_answers(all_data: dict, passage_dir: Path) -> dict:
                   '<p class="ast">Stage 5 순서 배열</p>'
                   f'<p>[A. 순서 배열]<br>정답: {s2.get("order_answer","")}</p>'
                   f'<p>[B. 문장 삽입]<br>정답: {s2.get("insert_answer","")}</p>'
-                  f'<p>[심화 - 문장 순서 배열]<br>정답: {s2.get("full_order_answer")}</p>'
+                  f'<p>[심화 - 문장 순서 배열]<br>정답: {s2.get("full_order_answer","")}</p>'
                   '</div>'
     )
 
     # Lv.6
     s3 = all_data.get("step3", {})
     correct = ', '.join(s3.get("blank_correct", []))
+
     stage6_wrong = ''.join(
-        f'<li>{i}</li>' for i in s3.get("blank_wrong_translation")
+        f'<li>{i}</li>' for i in (s3.get("blank_wrong_translation") or [])
     )
 
     blocks.append(f'<div class="ablock">'
@@ -1859,38 +1860,47 @@ def step8_answers(all_data: dict, passage_dir: Path) -> dict:
     stage7_step1_correct_list = stage7_data.get("grammar_bracket_answers")
     stage7_step2_error_list = stage7_data.get("grammar_error_answers")
 
-    
+    step1_items = []
     for i in range(0, len(stage7_step1_correct_list), 3):
-        chunck = stage7_step1_correct_list[i:i+3]
-        plus_data = ', '.join(f'({c.get("num")}) {c.get("answer")}' for c in chunck)
-        stage7_step1_answer = ''.join(f'<li>{plus_data}</li>')
+        chunk = stage7_step1_correct_list[i:i+3]
+        line = ', '.join(f'({c.get("num")}) {c.get("answer")}' for c in chunk)
+        step1_items.append(f'<li>{line}</li>')
     
+    stage7_step1_answer = ''.join(step1_items)
+    
+    step2_items = []
     for i in range(0, len(stage7_step2_error_list), 2):
-        chunck = stage7_step2_error_list[i:i+2]
-        sum_date = ', '.join(f'({c.get("num")}) {c.get("error")} → {c.get("answer")}' for c in chunck)
-        stage7_step2_answer = ''.join(f'<li>{sum_date}</li>')
+        chunk = stage7_step2_error_list[i:i+2]
+        line = ', '.join(
+            f'({c.get("num")}) {c.get("error")} → {c.get("original")}' for c in chunk)
+        stage7_step2_answer = ''.join(step2_items)
     
     blocks.append(f'<div class="ablock"><p class="ast">Stage 7-1 어법</p>'
-                   '<p>[STEP 1]</p>'
-                   f'<ul>{stage7_step1_answer}</ul>'
-                   '<p>[STEP 2]</p>'
-                   f'<ul>{stage7_step2_answer}</ul>'
-                   '</div>')
+                  '<p>[STEP 1]</p>'
+                  f'<ul>{stage7_step1_answer}</ul>'
+                  '<p>[STEP 2]</p>'
+                  f'<ul>{stage7_step2_answer}</ul>'
+                  '</div>'
+                  )
     
     # Stage 8 어휘 (Part A / Part B 정답만: 3단/2단 구성의 정답지)
     stage8_data = all_data.get("step6")
     stage8_partA_list = stage8_data.get("vocab_parta_answers")
     stage8_partB_list = stage8_data.get("vocab_partb_answers")
 
+    partA_items = []
     for i in range(0, len(stage8_partA_list), 3):
-        chunck = stage8_partA_list[i:i+3]
-        stage8_partA_answers = ' '.join(f'({c.get("num")}) {c.get("answer")}' for c in chunck)
-        insert_data8_A = ''.join(f'<li>{stage8_partA_answers}</li>')
+        chunk = stage8_partA_list[i:i+3]
+        stage8_partA_answers = ' '.join(f'({c.get("num")}) {c.get("answer")}' for c in chunk)
+        partA_items.append(f'<li>{stage8_partA_answers}</li>')
+        insert_data8_A = ''.join(partA_items)
 
+    partB_items = []
     for i in range(0, len(stage8_partB_list), 2):
         chunck = stage8_partB_list[i:i+2]
         stage8_partB_answers = ' '.join(f'({c.get("num")}) {', '.join(c.get("answer"))}' for c in chunck)
-        insert_data_8_B = ''.join(f'<li>{stage8_partB_answers}</li>')
+        partB_items.append(f'<li>{stage8_partB_answers}</li>')
+        insert_data_8_B = ''.join(partB_items)
 
     blocks.append('<div class="ablock"><p class="ast">Stage 8 어휘</p>'
                   '<p>[Part A]<p/>'
@@ -1900,29 +1910,29 @@ def step8_answers(all_data: dict, passage_dir: Path) -> dict:
                 )
 
     # Lv.9 - step2 정답 (정답: 번호만 / 오답: 번호+한글해석문장)
-    stage9_data = all.get("step6")
-    correct_numbers_kor = ', '.join(stage9_data.get("content_match_kr_answer"))
-    correct_numbers_eng = ', '.join(stage9_data.get("content_match_en_answer"))
+    stage9_data = all_data.get("step6") or {}
+    correct_numbers_kor = ', '.join(stage9_data.get("content_match_kr_answer") or [])
+    correct_numbers_eng = ', '.join(stage9_data.get("content_match_en_answer") or [])
+
     stage9_wrong_kor = ''.join(
-        f'<li>{i}</li>' for i in stage9_data.get("content_match_kr_wrong")
-    )
+          f'<li>{i}</li>' for i in (stage9_data.get("content_match_kr_wrong") or [])
+          )
     stage9_wrong_eng = ''.join(
-        f'<li>{i}</li>' for i in stage9_data.get("content_match_en_wrong")
-    )
+          f'<li>{i}</li>' for i in (stage9_data.get("content_match_en_wrong") or [])
+          )
 
     blocks.append(
-        '<div class="ablock"><p class="ast">Stage 9 내용 일치</p>'
-        '<p>[STEP 2 - Part A. 한국어]</p>'
-        f'<p>정답: {correct_numbers_kor}</p>'
-        '<p>[오답 선지 해설 및 정답]</p>'
-        f'<ul>{stage9_wrong_kor}</ul>'
-        '<p>[STEP 2 - Part B. English]</p>'
-        f'<p>정답: {correct_numbers_eng}</p>'
-        '<p>[오답 선지 해설 및 정답]</p>'
-        f'<ul>{stage9_wrong_eng}</ul>'
-        '</div>'
-    )
-
+          '<div class="ablock"><p class="ast">Stage 9 내용 일치</p>'
+          '<p>[STEP 2 - Part A. 한국어]</p>'
+          f'<p>정답: {correct_numbers_kor}</p>'
+          '<p>[오답 선지 해설 및 정답]</p>'
+          f'<ul>{stage9_wrong_kor}</ul>'
+          '<p>[STEP 2 - Part B. English]</p>'
+          f'<p>정답: {correct_numbers_eng}</p>'
+          '<p>[오답 선지 해설 및 정답]</p>'
+          f'<ul>{stage9_wrong_eng}</ul>'
+          '</div>'
+      )
 
     # Lv.10
     s7 = all_data.get("step7", {})
