@@ -679,13 +679,12 @@ def step2_order(passage: str, sentences: list, passage_dir: Path) -> dict:
 2. order_paragraphs: (A)(B)(C) 3개 단락 (각각 label과 text). 정답 순서는 원문 순서대로.
    - 지문 내용에 대한 변형/변경 절대 금지. [지문]의 내용을 그저 3개의 part로 나누는 것만 가능.
    - 모든 문장이 빠짐없이 포함되어야 함
-3. order_choices: 5지선다 (형식: "① (A)-(C)-(B)" 등). 정답 1개 포함.
-4. order_answer: 정답 번호 (예: "④ (C)-(A)-(B)")
-5. insert_sentence: 삽입할 문장 1개 (앞뒤 문맥 단서가 명확한 것, [지문]의 문장으로 변형하지 않고 그대로 반환.)
-6. insert_passage: insert_sentence를 뺀 [지문]에서의 나머지 문장들에 ( ① )~( ⑤ ) 위치 표시
-6.1 (중요)5번으로 지정된 문장을 제외하고 나머지 [지문]의 모든 문장의 내용을 그대로 반환한다.(변형 금지. 원문 축소/생략/요약 절대 금지! 삽입 문장 외의 모든 문장이 빠짐없이 포함되어야 함)
-7. insert_answer: 삽입 정답 번호
-8. full_order_answer: 정답 순서 (예: "(C)→(G)→(D)→...")
+3. order_answer: 정답 번호 (예: "④")
+4. insert_sentence: 삽입할 문장 1개 (앞뒤 문맥 단서가 명확한 것, [지문]의 문장으로 변형하지 않고 그대로 반환.)
+5. insert_passage: insert_sentence를 뺀 [지문]에서의 나머지 문장들에 ( ① )~( ⑤ ) 위치 표시
+5.1 (중요)5번으로 지정된 문장을 제외하고 나머지 [지문]의 모든 문장의 내용을 그대로 반환한다.(변형 금지. 원문 축소/생략/요약 절대 금지! 삽입 문장 외의 모든 문장이 빠짐없이 포함되어야 함)
+6. insert_answer: 삽입 정답 번호
+7. full_order_answer: 정답 순서 (예: "(C)→(G)→(D)→...")
 
 JSON 형식:
 {{
@@ -698,10 +697,23 @@ JSON 형식:
   "insert_answer": "...",
   "full_order_answer": "..."
 }}"""
-
+    
     data = call_claude_json(SYS_JSON, prompt, max_tokens=4096)
-
-    logger.debug(f"DEBUG | Stage 2 | CALL CLAUDE DATA CHECKD\n> {data}")
+    
+    # 5지 선다 고정 -> 정답의 번호에 선지 내용 붙이기
+    order_answer_dict = {
+            "①": "① (C)-(A)-(B)",
+            "②": "② (A)-(C)-(B)",
+            "③": "③ (B)-(A)-(C)",
+            "④": "④ (A)-(B)-(C)",
+            "⑤": "⑤ (B)-(C)-(A)"
+        }
+    
+    order_answer_value = data["order_answer"]
+    if order_answer_value is None:
+        raise ValueError(f"Stage 5 - A 정답값에 오류 발생 | 오류로 return된 값: {str(data['order_answer'])}")
+    
+    data["order_answer"] = order_answer_dict.get(data["order_answer"])
     
     # 변환: order_paragraphs를 [label, text] 형태로
     if data.get("order_paragraphs") and isinstance(data["order_paragraphs"][0], dict):
@@ -864,7 +876,7 @@ JSON 형식:
             data["order_paragraphs"] = [[p["label"], p["text"]] for p in data["order_paragraphs"]]
         if data.get("full_order_blocks") and isinstance(data["full_order_blocks"][0], dict):
             data["full_order_blocks"] = [[b["label"], b["text"]] for b in data["full_order_blocks"]]
-        _generate_order_choices(data)
+        # _generate_order_choices(data)
 
         # 내용 수동 구성이라 일단 주석처리
         # # 재검증 후에도 실패하면, 원문 기반으로 강제 구성(축약 방지)
@@ -975,7 +987,7 @@ def step3_blank(passage: str, passage_dir: Path) -> dict:
     return data
 
 # ============================================================
-# STEP 4: Stage 7 주제 찾기
+# STEP 4: Stage 7 주제 찾기 -> 현재 Stage 4의 하단 문제로 포함되어 있음.
 # ============================================================
 def step4_topic(passage: str, passage_dir: Path) -> dict:
     cached = load_step(passage_dir, "step4_topic")
@@ -996,12 +1008,14 @@ def step4_topic(passage: str, passage_dir: Path) -> dict:
 - 오답: 지문 미언급, 부분적 내용, 왜곡 (영어)
 - 추론적 사고 금지: 글에서 직접 언급된 내용만 정답
 - 각 선지는 30단어 이내로 간결하게
+- `topic_wrong_translation`은 
 
 [JSON 형식]
 {{
   "topic_options": ["① the importance of...", "② how to...", ... "⑫ ..."],
   "topic_correct": ["②", "④", ...],
-  "topic_wrong": ["①", "③", ...]
+  "topic_wrong": ["①", "③", ...],
+  "topic_wrong_translation": ["① ①의 한글 해석 내용", "③ ③의 한글 해석 내용", ...]
 }}"""
 
     data = call_claude_json(SYS_JSON, prompt, max_tokens=3000)
@@ -1011,6 +1025,7 @@ def step4_topic(passage: str, passage_dir: Path) -> dict:
 
 # ============================================================
 # STEP 5: Lv.8 어법
+# => Stage 7-1 어법 | Stage 7-2 어법 최종 체크
 # ============================================================
 def step5_grammar(passage: str, passage_dir: Path) -> dict:
     cached = load_step(passage_dir, "step5_grammar")
@@ -1038,6 +1053,7 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
 5. 문장 수가 부족하면 오류/괄호 수를 줄이세요 (문장 추가는 절대 금지!)
 6. 새로운 문장을 만들어 넣지 마세요! 원문에 있는 문장만 사용!
 7. 출력 결과의 문장을 하나씩 세어보고, {sent_count}개가 아니면 수정하세요
+8. 8-1, 8-2 모두 원문에 없는 문장을 절대 추가하지 말 것. 원문 문장 수 = 출력 문장 수 반드시 일치!
 
 [어법 오류 출제 금지 유형 - 아래는 오류가 아님, 절대 괄호로 출제하지 마세요!]
 - start/continue/love/like/hate 뒤: to부정사 = ing (둘 다 허용)
@@ -1063,8 +1079,10 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
 
 [어법 괄호형 Lv.8-1]
 - 원문 {sent_count}개 문장 모두 포함 (출제 안 하는 문장도 원문 그대로)
-- {bracket_count}개 괄호: (N)[정답 / 오답] 형태 ← 반드시 이 형식! 예: (1)[looked / look]
-- ⚠ 괄호가 없으면 출제 실패입니다! 반드시 (숫자)[A / B] 형태의 괄호를 삽입하세요!
+- {bracket_count}개 괄호
+    - 괄호 형식: (N)[정답 / 오답] (N: 문제 번호 숫자)
+    - 예시: (1)[looked / look]
+    - ⚠ 괄호가 없으면 출제 실패입니다! 반드시 (숫자)[A / B] 형태의 괄호를 삽입하세요!
 - 한 문장에 여러 괄호 가능
 - 정답이 왼쪽인 경우 50%, 오른쪽인 경우 50%가 되도록 반드시 균등 배치 (예: 10개면 5개는 정답이 왼쪽, 5개는 오른쪽)
 - 출제: 시제, 대명사, 동명사, to부정사, 형용사/부사, 관계대명사, 분사, 사역동사 등
@@ -1077,7 +1095,6 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
 - 오류를 삽입한 실제 개수를 grammar_error_count에 정확히 기록할 것
 - 오류 개수 = grammar_error_answers 배열 길이와 반드시 일치
 - ⚠ 8-2 오류 삽입 부분 외의 텍스트는 원문과 100% 동일해야 함! AI가 주변 단어를 무의식적으로 바꾸지 말 것!
-- ⚠ 8-1, 8-2 모두 원문에 없는 문장을 절대 추가하지 말 것! 원문 문장 수 = 출력 문장 수 반드시 일치!
 
 [JSON 형식]
 {{
@@ -1526,6 +1543,7 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
 
 # ============================================================
 # STEP 6: Lv.9 어휘심화 + 내용일치
+# => Stage 8: 어휘 심화 | Stage 9: 내용 일치
 # ============================================================
 def step6_vocab_content(passage: str, passage_dir: Path) -> dict:
     cached = load_step(passage_dir, "step6_vocab_content")
@@ -1567,6 +1585,15 @@ def step6_vocab_content(passage: str, passage_dir: Path) -> dict:
 - 한국어와 영어 선지의 순서는 서로 다르게 랜덤 배치
 - 10개 미만이면 실패로 간주됨. 반드시 ①②③④⑤⑥⑦⑧⑨⑩ 10개 모두 작성할 것
 
+[content_match_kr_wrong, content_match_en_wrong에 대한 지침]
+- 오답으로 출제된 문제에 대해 원래 정답인 내용을 말한다.(한글에는 한글 내용, 영어에는 영어 내용)
+    - content_match_kr_wrong의 예시
+        - 문제로 작성된 내용: "① 화산 진흙이나 남극의 얼음 아래에서는 생물체를 찾을 수 없다."
+        - content_match_kr_wrong에 들어갈 내용: "① 화산 진흙이나 남극의 얼음 아래에서는 생물체를 발견될 수 있다." (실제 옳은 해석)
+    - content_match_en_wrong의 예시
+        - 문제로 작성된 내용: "④ Guests must select 'Travel Packages' in the reservation form."
+        - content_match_en_wrong에 들어갈 내용: "④ Select "Vacation Packages" in the reservation form." (문제가 되는 내용을 만들기 위해 사용한 원래 문장)
+
 [JSON 형식]
 {{
   "vocab_advanced_passage": "괄호 포함 지문",
@@ -1575,8 +1602,10 @@ def step6_vocab_content(passage: str, passage_dir: Path) -> dict:
   "vocab_partb_answers": [{{"num":1, "correct":["considered", "perceived"], "wrong":["overlooked", "neglected", "dismissed"]}}, ...],
   "content_match_kr": ["① ...", "② ...", "③ ...", "④ ...", "⑤ ...", "⑥ ...", "⑦ ...", "⑧ ...", "⑨ ...", "⑩ ..."],
   "content_match_kr_answer": ["②", "③", "⑤", ...],
+  "content_match_kr_wrong": ["① ...", "④ ...", "⑥ ...", ...],
   "content_match_en": ["① ...", "② ...", "③ ...", "④ ...", "⑤ ...", "⑥ ...", "⑦ ...", "⑧ ...", "⑨ ...", "⑩ ..."],
   "content_match_en_answer": ["②", "④", ...]
+  "content_match_en_wrong": ["① ...", "③ ...", ...]
 }}"""
 
     data = call_claude_json(SYS_JSON_KR, prompt, max_tokens=6000)
@@ -1785,79 +1814,115 @@ def step8_answers(all_data: dict, passage_dir: Path) -> dict:
     # 정답 HTML 생성 (레벨별 블록화)
     blocks = []
 
-    # Lv.1
-    blocks.append('<div class="ablock"><p class="ast">Stage 1 어휘 테스트</p>'
-                   '<p>A. (어휘 테스트 정답은 학생이 직접 확인)</p></div>')
+    # Lv.4(구 Stage 7의 정답: 정답 번호들+오답의 해석)
+    stage7_data = all_data.get("step7")
+    correct_number = stage7_data.get("topic_correct")
+    wrong_translation = ''.join(
+        f'<li>{w}</li>' for w in stage7_data.get("topic_wrong_translation", [])
+    )
+
+    blocks.append(
+        '<div class="ablock">'
+        '<p class="ast">Stage 4 수업 직후 정리</p>'
+        f'<p>[STEP 1 - 주제문 직접 쓰기]<br> 정답: {correct_number}</p>'
+        f'<p>[오답 선지 해석]</p>'
+        f'<ul>{wrong_translation}</ul>'
+        '</div>'
+    )
 
     # Lv.5
     s2 = all_data.get("step2", {})
-    blocks.append(f'<div class="ablock"><p class="ast">Stage 5 순서 배열</p>'
-                   f'<p>[A. 순서 배열]\n> 정답: {s2.get("order_answer","")}</p>'
-                   f'<p>[B. 문장 삽입]\n> 정답: {s2.get("insert_answer","")}</p>'
-                   f'<p>[심화 - 문장 순서 배열]\n> 정답: {s2.get("full_order_answer")}</p></div>')
+    blocks.append(f'<div class="ablock">'
+                  '<p class="ast">Stage 5 순서 배열</p>'
+                  f'<p>[A. 순서 배열]<br>정답: {s2.get("order_answer","")}</p>'
+                  f'<p>[B. 문장 삽입]<br>정답: {s2.get("insert_answer","")}</p>'
+                  f'<p>[심화 - 문장 순서 배열]<br>정답: {s2.get("full_order_answer")}</p>'
+                  '</div>'
+    )
 
     # Lv.6
     s3 = all_data.get("step3", {})
     correct = ', '.join(s3.get("blank_correct", []))
-    wrong = '\n'.join(s3.get("blank_wrong_translation", []))
+    stage6_wrong = ''.join(
+        f'<li>{i}</li>' for i in s3.get("blank_wrong_translation")
+    )
 
-    blocks.append(f'<div class="ablock"><p class="ast">Stage 6 빈칸 추론</p>'
-                   f'<p>[STEP 2]\n> 정답: {correct}</p>'
-                   f'<p>오답 선지 해석\n{wrong}</p></div>')
+    blocks.append(f'<div class="ablock">'
+                  '<p class="ast">Stage 6 빈칸 추론</p>'
+                   f'<p>[STEP 2]<br>정답: {correct}</p>'
+                   '<p>[오답 선지 해석]</p>'
+                   f'<ul>{stage6_wrong}</ul>'
+                   '</div>')
 
-    # Lv.7
-    s4 = all_data.get("step4", {})
-    step1_correct = ', '.join(s4.get("topic_correct", []))
+    # Lv.7-1 (step1 / step2 정답 3단/2단 나열)
+    stage7_data = all_data.get("step5")
+    stage7_step1_correct_list = stage7_data.get("grammar_bracket_answers")
+    stage7_step2_error_list = stage7_data.get("grammar_error_answers")
+
     
-    s5 = all_data.get("step5", {}).get
-    step2_correct = s4.get("topic_correct", [])
+    for i in range(0, len(stage7_step1_correct_list), 3):
+        chunck = stage7_step1_correct_list[i:i+3]
+        plus_data = ', '.join(f'({c.get("num")}) {c.get("answer")}' for c in chunck)
+        stage7_step1_answer = ''.join(f'<li>{plus_data}</li>')
+    
+    for i in range(0, len(stage7_step2_error_list), 2):
+        chunck = stage7_step2_error_list[i:i+2]
+        sum_date = ', '.join(f'({c.get("num")}) {c.get("error")} → {c.get("answer")}' for c in chunck)
+        stage7_step2_answer = ''.join(f'<li>{sum_date}</li>')
+    
     blocks.append(f'<div class="ablock"><p class="ast">Stage 7-1 어법</p>'
-                   f'<p>STEP 1.\n> 정답: {step1_correct}</p><p>STEP 2.\n> 정답: {step2_correct}</p></div>')
-    blocks.append(f'<div class="ablock"><p class="ast">Stage 7-2 어법 최종 체크</p>'
-                   f'<p>STEP 1.\n정답: {step2_correct}</p></div>')
+                   '<p>[STEP 1]</p>'
+                   f'<ul>{stage7_step1_answer}</ul>'
+                   '<p>[STEP 2]</p>'
+                   f'<ul>{stage7_step2_answer}</ul>'
+                   '</div>')
+    
+    # Stage 8 어휘 (Part A / Part B 정답만: 3단/2단 구성의 정답지)
+    stage8_data = all_data.get("step6")
+    stage8_partA_list = stage8_data.get("vocab_parta_answers")
+    stage8_partB_list = stage8_data.get("vocab_partb_answers")
 
-    # Lv.8 괄호
-    s5 = all_data.get("step5", {})
-    lv8_bracket = ['<div class="ablock"><p class="ast">Stage 8 어법 (괄호)</p>']
-    for a in s5.get("grammar_bracket_answers", []):
-        if isinstance(a, dict):
-            lv8_bracket.append(f'<p>({a.get("num","")}) {a.get("answer","")}</p>')
-    lv8_bracket.append('</div>')
-    blocks.append(''.join(lv8_bracket))
+    for i in range(0, len(stage8_partA_list), 3):
+        chunck = stage8_partA_list[i:i+3]
+        stage8_partA_answers = ' '.join(f'({c.get("num")}) {c.get("answer")}' for c in chunck)
+        insert_data8_A = ''.join(f'<li>{stage8_partA_answers}</li>')
 
-    # Stage 8 서술형 (해설 없이 오류→정답만)
-    lv8_error = ['<div class="ablock"><p class="ast">Stage 8 서술형</p>']
-    for a in s5.get("grammar_error_answers", []):
-        if isinstance(a, dict):
-            lv8_error.append(f'<p>({a.get("num","")}) {a.get("original","")}</p>')
-    lv8_error.append('</div>')
-    blocks.append(''.join(lv8_error))
+    for i in range(0, len(stage8_partB_list), 2):
+        chunck = stage8_partB_list[i:i+2]
+        stage8_partB_answers = ' '.join(f'({c.get("num")}) {', '.join(c.get("answer"))}' for c in chunck)
+        insert_data_8_B = ''.join(f'<li>{stage8_partB_answers}</li>')
 
-    # Lv.9-1 Part A
-    s6 = all_data.get("step6", {})
-    lv9a = ['<div class="ablock"><p class="ast">Stage 9-1 어휘 Part A</p>']
-    for a in s6.get("vocab_parta_answers", []):
-        if isinstance(a, dict):
-            lv9a.append(f'<p>({a.get("num","")}) {a.get("answer","")}</p>')
-    lv9a.append('</div>')
-    blocks.append(''.join(lv9a))
+    blocks.append('<div class="ablock"><p class="ast">Stage 8 어휘</p>'
+                  '<p>[Part A]<p/>'
+                  f'<ul>{insert_data8_A}</ul>'
+                  '<>[Part B]</>'
+                  f'<ul>{insert_data_8_B}</ul>'
+                )
 
-    # Lv.9-1 Part B + Lv.9-2
-    lv9b = ['<div class="ablock"><p class="ast">Stage 9-1 어휘 Part B</p>']
-    for a in s6.get("vocab_partb_answers", []):
-        if isinstance(a, dict):
-            correct_list = ', '.join(a.get("correct", []))
-            lv9b.append(f'<p>{a.get("num","")}: {correct_list}</p>')
-    lv9b.append('</div>')
-    blocks.append(''.join(lv9b))
+    # Lv.9 - step2 정답 (정답: 번호만 / 오답: 번호+한글해석문장)
+    stage9_data = all.get("step6")
+    correct_numbers_kor = ', '.join(stage9_data.get("content_match_kr_answer"))
+    correct_numbers_eng = ', '.join(stage9_data.get("content_match_en_answer"))
+    stage9_wrong_kor = ''.join(
+        f'<li>{i}</li>' for i in stage9_data.get("content_match_kr_wrong")
+    )
+    stage9_wrong_eng = ''.join(
+        f'<li>{i}</li>' for i in stage9_data.get("content_match_en_wrong")
+    )
 
-    kr_ans = ', '.join(s6.get("content_match_kr_answer", []))
-    en_ans = ', '.join(s6.get("content_match_en_answer", []))
-    lv92 = ['<div class="ablock"><p class="ast">Stage 9-2 내용일치</p>']
-    lv92.append(f'<p>한국어: {kr_ans}</p>')
-    lv92.append(f'<p>영어: {en_ans}</p>')
-    lv92.append('</div>')
-    blocks.append(''.join(lv92))
+    blocks.append(
+        '<div class="ablock"><p class="ast">Stage 9 내용 일치</p>'
+        '<p>[STEP 2 - Part A. 한국어]</p>'
+        f'<p>정답: {correct_numbers_kor}</p>'
+        '<p>[오답 선지 해설 및 정답]</p>'
+        f'<ul>{stage9_wrong_kor}</ul>'
+        '<p>[STEP 2 - Part B. English]</p>'
+        f'<p>정답: {correct_numbers_eng}</p>'
+        '<p>[오답 선지 해설 및 정답]</p>'
+        f'<ul>{stage9_wrong_eng}</ul>'
+        '</div>'
+    )
+
 
     # Lv.10
     s7 = all_data.get("step7", {})
@@ -1929,7 +1994,7 @@ def merge_to_template_data(passage: str, meta: dict, all_steps: dict) -> dict:
         # Lv.5 순서/삽입
         "order_intro": s2.get("order_intro", ""),
         "order_paragraphs": s2.get("order_paragraphs", []),
-        "order_choices": s2.get("order_choices", []),
+        # "order_choices": s2.get("order_choices", []),
         "insert_sentence": s2.get("insert_sentence", ""),
         "insert_passage": s2.get("insert_passage", ""),
         "full_order_blocks": s2.get("full_order_blocks", []),
