@@ -1842,7 +1842,7 @@ def step8_answers(all_data: dict, passage_dir: Path) -> dict:
 
     # Lv.6
     s3 = all_data.get("step3", {})
-    correct = ', '.join(s3.get("blank_correct", []))
+    correct = ', '.join(s3.get("blank_correct") or [])
 
     stage6_wrong = ''.join(
         f'<li>{i}</li>' for i in (s3.get("blank_wrong_translation") or [])
@@ -1856,9 +1856,9 @@ def step8_answers(all_data: dict, passage_dir: Path) -> dict:
                    '</div>')
 
     # Lv.7-1 (step1 / step2 정답 3단/2단 나열)
-    stage7_data = all_data.get("step5")
-    stage7_step1_correct_list = stage7_data.get("grammar_bracket_answers")
-    stage7_step2_error_list = stage7_data.get("grammar_error_answers")
+    stage7_data = all_data.get("step5") or {}
+    stage7_step1_correct_list = stage7_data.get("grammar_bracket_answers") or []
+    stage7_step2_error_list = stage7_data.get("grammar_error_answers") or []
 
     step1_items = []
     for i in range(0, len(stage7_step1_correct_list), 3):
@@ -1873,7 +1873,8 @@ def step8_answers(all_data: dict, passage_dir: Path) -> dict:
         chunk = stage7_step2_error_list[i:i+2]
         line = ', '.join(
             f'({c.get("num")}) {c.get("error")} → {c.get("original")}' for c in chunk)
-        stage7_step2_answer = ''.join(step2_items)
+    
+    stage7_step2_answer = ''.join(step2_items)
     
     blocks.append(f'<div class="ablock"><p class="ast">Stage 7-1 어법</p>'
                   '<p>[STEP 1]</p>'
@@ -1893,14 +1894,16 @@ def step8_answers(all_data: dict, passage_dir: Path) -> dict:
         chunk = stage8_partA_list[i:i+3]
         stage8_partA_answers = ' '.join(f'({c.get("num")}) {c.get("answer")}' for c in chunk)
         partA_items.append(f'<li>{stage8_partA_answers}</li>')
-        insert_data8_A = ''.join(partA_items)
+    
+    insert_data8_A = ''.join(partA_items)
 
     partB_items = []
     for i in range(0, len(stage8_partB_list), 2):
         chunck = stage8_partB_list[i:i+2]
-        stage8_partB_answers = ' '.join(f'({c.get("num")}) {', '.join(c.get("answer"))}' for c in chunck)
+        stage8_partB_answers = ' '.join(f'({c.get("num")}) {', '.join(c.get("correct"))}' for c in chunck)
         partB_items.append(f'<li>{stage8_partB_answers}</li>')
-        insert_data_8_B = ''.join(partB_items)
+    
+    insert_data_8_B = ''.join(partB_items)
 
     blocks.append('<div class="ablock"><p class="ast">Stage 8 어휘</p>'
                   '<p>[Part A]<p/>'
