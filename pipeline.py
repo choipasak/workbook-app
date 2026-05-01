@@ -1010,7 +1010,6 @@ def step4_topic(passage: str, passage_dir: Path) -> dict:
 - 오답: 지문 미언급, 부분적 내용, 왜곡 (영어)
 - 추론적 사고 금지: 글에서 직접 언급된 내용만 정답
 - 각 선지는 30단어 이내로 간결하게
-- `topic_wrong_translation`은 
 
 [JSON 형식]
 {{
@@ -1833,7 +1832,7 @@ def step8_answers(all_data: dict, passage_dir: Path) -> dict:
         '<p class="ast">Stage 4 수업 직후 정리</p>'
         f'<p>[STEP 1 - 주제문 직접 쓰기]<br>정답: {correct_number}</p>'
         '<p>[오답 선지 해석]</p>'
-        f'<ul>{wrong_translation}</ul>'
+        f'{wrong_translation}'
         '</div>'
     )
 
@@ -1851,6 +1850,9 @@ def step8_answers(all_data: dict, passage_dir: Path) -> dict:
     s3 = all_data.get("step3") or {}
     correct = ', '.join(s3.get("blank_correct") or [])
     wrong_list6 = s3.get("blank_wrong_translation") or []
+
+    logger.debug(f"DEBUG | STAGE 6 | DATA가 있는가? CHECK\n{wrong_list6}\n")
+
     wrong_items6 = []
     for i in wrong_list6:
         wrong_items6.append(f'<p>{i}</p>')
