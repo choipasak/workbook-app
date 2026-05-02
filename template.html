@@ -71,19 +71,18 @@
             break-after: avoid;
         }
 
-        /* 정답 페이지: 합본 시 중간 정답 페이지도 한 장 차지하도록 명시
-           min-height: 285mm — @media print의 .page와 일치시켜 초과분으로 인한 빈 페이지 방지 */
+        /* 정답 페이지: 높이를 강제로 잡지 않고, 다음 지문으로 넘어갈 때만 페이지를 넘김 */
         .page.page-answer {
             page-break-after: always;
             break-after: page;
-            min-height: 285mm;
+            min-height: 0 !important;
         }
 
         /* 진짜 마지막 페이지(자바스크립트가 부여)만 빈 페이지 방지 */
         .page.page-answer.page-last {
             page-break-after: avoid;
             break-after: avoid;
-            min-height: 0;
+            min-height: 0 !important;
         }
 
 
@@ -1580,15 +1579,14 @@
                 padding-right: 15mm;
             }
 
-            /* 정답 페이지: print 모드에서 강제로 .page와 동일한 285mm 적용 (specificity 충돌 방지)
-               외부 정의(.page.page-answer { min-height: 285mm })가 이미 있지만, !important로 더 안전하게 처리 */
+            /* 정답 페이지: print 모드에서도 높이를 강제로 잡지 않고 페이지 넘김만 유지 */
             .page.page-answer {
-                min-height: 285mm !important;
+                min-height: 0 !important;
                 page-break-after: always;
                 break-after: page;
             }
 
-            /* 진짜 마지막 페이지(자바스크립트가 부여)만 콘텐츠 만큼만 + 빈 페이지 방지 */
+            /* 진짜 마지막 페이지(자바스크립트가 부여)만 빈 페이지 방지 */
             .page.page-answer.page-last {
                 min-height: 0 !important;
                 page-break-after: avoid;
