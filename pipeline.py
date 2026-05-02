@@ -6,13 +6,13 @@ PIPELINE_VERSION = "v10"
 # Step별 버전 관리: 해당 step 코드 수정 시 버전만 올리면 캐시 자동 무효화
 STEP_VERSIONS = {
     "step1_basic": "v3",
-    "step2_order": "v5",
+    "step2_order": "v6",
     "step3_blank": "v3",
     "step4_topic": "v3",
-    "step5_grammar": "v8",
+    "step5_grammar": "v9",
     "step6_vocab_content": "v3",
     "step7_writing": "v3",
-    "step8_answers": "v8",
+    "step8_answers": "v9",
     "secret_note_a": "v1",
     "secret_note_b": "v1",
     "secret_note_c": "v5",  # v5: 유의어 6-7개, 고난도 4-5개, 요지 2배 길이, 가로 배치
@@ -1373,6 +1373,27 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
    - 예: I ordered the dish (N)[called / calling] kibbeling. (수동 → called)
    - 예: the children (N)[playing / played] in the park. (능동 → playing)
    - 핵심: 수식 대상(명사)이 행위의 주체이면 능동(-ing), 대상이면 수동(p.p.)
+19. ★★★ 문장 시작 분사구문 vs 명령문 (★★★ 사용자 강력 요청, 헷갈리는 자리!): 문장 시작에 V-ing/V 형태가 오면 분사구문 vs 명령문 헷갈림
+   - 예: (N)[Reading / Read] those letters, I found out... (분사구문 → Reading, 명령문 아님)
+   - 예: (N)[Walking / Walk] down the street, she met her friend. (분사구문 → Walking)
+   - 예: (N)[Looking / Look] at the sky, I felt peaceful. (분사구문 → Looking)
+   - 핵심: 뒤에 콤마 + 주어+동사 절이 오면 분사구문 (V-ing), 명령문이면 단독 절
+   - ⚠ 지문에 "V-ing, S+V" 패턴이 있으면 무조건 출제 권장!
+20. ★★ 관용구문 couldn't help but + 동사원형 (★★ 사용자 강력 요청): couldn't help but 뒤에는 동사원형!
+   - 예: I couldn't help but (N)[admire / admiring] the view. (couldn't help but → 동사원형 admire)
+   - 예: She couldn't help but (N)[laugh / laughing]. (couldn't help but → 동사원형 laugh)
+   - 비교: cannot help + V-ing (couldn't help admiring) — 같은 의미지만 형태 다름
+   - 지문에 "couldn't help but" 또는 "can't help but" 패턴 있으면 반드시 출제!
+21. ★★ recommend/suggest/consider + 동명사 (★★ 사용자 강력 요청, 11번 강화): 이 동사들 뒤에는 반드시 동명사!
+   - 예: I recommend (N)[visiting / to visit] the museum. (recommend → 동명사 visiting)
+   - 예: She suggested (N)[going / to go] to the park. (suggest → 동명사 going)
+   - 예: He considered (N)[changing / to change] jobs. (consider → 동명사 changing)
+   - to부정사만 받는 동사 (decide, want, hope, plan)와 명확히 구별!
+22. ★★ be + 형용사 vs 부사 (★★ 사용자 강력 요청, 16번 강화): be동사 뒤는 형용사 (보어), 부사가 오면 안 됨
+   - 예: A trip wouldn't be (N)[complete / completely] without it. (be 뒤 보어 → 형용사 complete)
+   - 예: She is (N)[happy / happily]. (be 뒤 → 형용사 happy)
+   - 예: The work is (N)[perfect / perfectly]. (be 뒤 → 형용사 perfect)
+   - 단, 'be + 부사 + 형용사/분사' 형태 (예: is completely correct)일 때 부사는 OK
 
 [⚠️ 추가 핵심 금지 — 명사 주어 바로 옆 수일치]
 단복수 차이 쌍 (X / Xs 형태: confirm/confirms, factor/factors, cause/causes 등)은 주어가 멀리 있을 때만 출제 가능!
@@ -1386,11 +1407,14 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
 → 학생이 1초 안에 풀 수 있는 자리는 무조건 피하세요.
 [어법 괄호형 Lv.8-1]
 - 원문 {sent_count}개 문장 모두 포함 (출제 안 하는 문장도 원문 그대로)
-- ⚠️ 괄호 최소 {min_brackets}개, 가능하면 {bracket_count}개 (지문이 짧으면 {min_brackets}개도 OK!)
-- 우선순위 자리가 부족하면 다른 어법 자리도 활용해서 반드시 8개는 채울 것
+- ⚠️⚠️⚠️ 괄호 개수 절대 규칙: 반드시 {min_brackets}개 이상! 지문 길이별 강제:
+   - 짧은 지문(80단어 이하) → 최소 2개 (그 이상도 가능)
+   - 중간 지문(81~120단어) → 최소 3개
+   - 긴 지문(121단어 이상) → ⚠ 반드시 7~10개 이상! 절대 2~3개로 끝내지 말 것!
+- 우선순위 자리가 부족해도 위에 명시한 19~22번 자리(분사구문, couldn't help but, recommend ing, be 형용사)를 활용해서 충분히 채우세요
 - 괄호 형식: (N)[정답 / 오답] (N: 문제 번호 숫자)
 - 예시: (1)[looked / look]
-- ⚠ 괄호가 없거나 8개 미만이면 출제 실패입니다!
+- ⚠ 괄호가 너무 적으면(긴 지문에서 5개 미만) 출제 실패!
 - 한 문장에 여러 괄호 가능
 - 정답이 왼쪽인 경우 50%, 오른쪽인 경우 50%가 되도록 반드시 균등 배치 (예: 10개면 5개는 정답이 왼쪽, 5개는 오른쪽)
 - 출제: 시제, 대명사, 동명사, to부정사, 형용사/부사, 관계대명사, 분사, 사역동사 등
