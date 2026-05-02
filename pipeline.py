@@ -1074,6 +1074,7 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
 - ⚠ 위 유형으로 괄호를 만들면 둘 다 정답이 되어 문제가 성립하지 않습니다!
 - ⚠ 특히 help/지각동사/병렬구조는 가장 흔한 실수입니다. 반드시 피하세요!
 - 과거 vs 과거진행: 문맥상 둘 다 자연스러운 경우 출제 금지! (예: practiced / was practicing — 기간 부사와 함께 쓰이면 둘 다 가능)
+- 현재 vs 현재진행: 진행시제와 일반시제는 학자/문법서 따라 거의 같이 쓰이는 경우가 많음. 출제 금지! (예: functions / is functioning, works / is working, runs / is running — 둘 다 자연스럽게 허용됨)
 - 성별 불명확: 지문에서 성별 특정 불가능한 경우 his/her, him/her 출제 금지! (사람 이름이 명확할 때만 가능)
 - 고유명사+s: 고유명사 뒤에 -s 붙이는 문제 출제 금지! (예: Walthamstow / Walthamstows)
 - 선택지에 정답 반드시 포함: 정답이 선택지에 없으면 문제 성립 불가! (예: 정답이 those인데 [that / where] 제시 → 절대 금지!)
@@ -1094,6 +1095,8 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
 - 주어 바로 옆 수일치: the fire (N)[doesn't / don't], the rate (N)[increases / increase], the heat (N)[has / have]
 - 인칭대명사+동사 바로 옆 수일치: he (N)[gets / get], she (N)[is / are], it (N)[works / work]
 - until/when/if + 주어 바로 옆: until he (N)[gets / get] tired, when she (N)[arrives / arrive]
+- 능동/수동 문제 뒤에 by 행위자가 있으면 금지: (N)[replace / are replaced] by ~, (N)[causing / caused] by ~ → by가 있으면 수동태가 1초 컷! 출제 금지!
+- 학생이 괄호 앞이든 뒤든 1초만에 풀 수 있으면 모두 출제 금지! "앞 힌트" 못지않게 "뒤 힌트"도 금지!
 
 ✓ 출제 가능 (사이에 거리가 있어 학생이 분석해야 함):
 - 주어-동사 사이에 관계절/전치사구/삽입구가 있는 수일치
@@ -1114,6 +1117,10 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
 2. 분사 능동/수동 (수식 대상 명사와의 관계 분석)
 3. 관계사 구별 (뒤에 오는 절의 완전성 분석)
 4. 거리가 있는 수일치 (주어-동사 사이 5단어 이상)
+   - 특히 ★ 주격관계대명사(who/which/that) 뒤 동사 수일치 (★ 내신 최빈출!): 선행사가 단수/복수에 따라 동사 형태 결정
+   - 예: people who (N)[think / thinks] differently (선행사 people 복수 → think)
+   - 예: a person who (N)[think / thinks] differently (선행사 person 단수 → thinks)
+   - 예: an operating process, which consciously (N)[attempt / attempts] to locate thoughts (선행사 process 단수 → attempts)
 5. 분사구문 능/수동
 6. 형용사 vs 부사 (수식 대상 분석 필요한 경우만)
 7. 혼동 수일치 (★ 내신 빈출): 부분/수량 표현, 도치문, 등위접속사 주어
@@ -1565,8 +1572,8 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
         removed_na = []
         # 금지 단어 패턴: 괄호 바로 앞 단어가 이런 거면 "바로 옆" 자리
         forbidden_left = {
-            # 인칭대명사
-            'i', 'you', 'he', 'she', 'it', 'we', 'they',
+            # 인칭대명사 + 부정대명사
+            'i', 'you', 'he', 'she', 'it', 'we', 'they', 'one',
             # 조동사
             'will', 'would', 'can', 'could', 'shall', 'should', 'may', 'might', 'must',
             # 완료시제
@@ -1628,7 +1635,7 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
         all_br_na = re.findall(r'\((\d+)\)\[([^\]]+)\]', final_bp_na)
         removed_na = []
         forbidden_left = {
-            'i', 'you', 'he', 'she', 'it', 'we', 'they',
+            'i', 'you', 'he', 'she', 'it', 'we', 'they', 'one',
             'will', 'would', 'can', 'could', 'shall', 'should', 'may', 'might', 'must',
             'has', 'have', 'had',
             'is', 'are', 'was', 'were', 'am', 'be', 'been', 'being',
@@ -1672,6 +1679,56 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
             data["grammar_bracket_answers"] = [a for a in data.get("grammar_bracket_answers", []) if a.get("num") not in removed_na]
             data["grammar_bracket_count"] = len(re.findall(r'\(\d+\)\[', final_bp_na))
             _safe_print(f"  ✅ '바로 옆' 자리 {len(removed_na)}개 제거 완료")
+
+    # ★ "뒤에 by" 능동/수동 자동 제거 — 뒤에 by 행위자 있으면 수동태 1초 컷
+    final_bp_by = data.get("grammar_bracket_passage", "")
+    if final_bp_by:
+        all_br_by = re.findall(r'\((\d+)\)\[([^\]]+)\]', final_bp_by)
+        removed_by = []
+        for num_str, content in all_br_by:
+            # 능/수동 쌍인지 확인 (한쪽이 p.p. 형태이거나 are/was/is/were 포함)
+            parts = [p.strip().lower() for p in content.split('/')]
+            if len(parts) != 2:
+                continue
+            is_voice_pair = False
+            # 패턴 1: be동사 포함 (are replaced / replace)
+            for p in parts:
+                if 'are ' in p or 'is ' in p or 'was ' in p or 'were ' in p or 'be ' in p or 'been ' in p:
+                    is_voice_pair = True
+                    break
+            # 패턴 2: ed/en vs ing 쌍 (caused / causing)
+            if not is_voice_pair:
+                ends = [p.split()[-1] if p.split() else '' for p in parts]
+                has_ed = any(e.endswith('ed') or e.endswith('en') for e in ends)
+                has_ing = any(e.endswith('ing') for e in ends)
+                if has_ed and has_ing:
+                    is_voice_pair = True
+            if not is_voice_pair:
+                continue
+            # 괄호 뒤 텍스트 50자 안에 "by 단어"가 있는지
+            bracket_pos = final_bp_by.find(f'({num_str})[')
+            close_pos = final_bp_by.find(']', bracket_pos)
+            if close_pos < 0:
+                continue
+            after_text = final_bp_by[close_pos+1:close_pos+50].lower().strip()
+            if re.match(r'^\s*by\s+\w', after_text):
+                # 뒤에 by 행위자 → 수동태 1초 컷 → 괄호 제거
+                correct_word = ""
+                for ans in data.get("grammar_bracket_answers", []):
+                    if ans.get("num") == int(num_str):
+                        correct_word = ans.get("answer", "")
+                        break
+                if not correct_word:
+                    correct_word = content.split('/')[0].strip()
+                if correct_word:
+                    final_bp_by = re.sub(r'\(' + num_str + r'\)\[[^\]]+\]', correct_word, final_bp_by)
+                    removed_by.append(int(num_str))
+                    _safe_print(f"  🚫 '뒤에 by' 능/수동 괄호({num_str}) 제거: 뒤='{after_text[:30]}' → '{correct_word}'")
+        if removed_by:
+            data["grammar_bracket_passage"] = final_bp_by
+            data["grammar_bracket_answers"] = [a for a in data.get("grammar_bracket_answers", []) if a.get("num") not in removed_by]
+            data["grammar_bracket_count"] = len(re.findall(r'\(\d+\)\[', final_bp_by))
+            _safe_print(f"  ✅ '뒤에 by' 능/수동 {len(removed_by)}개 제거 완료")
 
     # ★ whom/who 둘다정답 괄호 제거
     final_bp3 = data.get("grammar_bracket_passage", "")
