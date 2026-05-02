@@ -2546,13 +2546,17 @@ def merge_html_files(output_dir=None):
     style_match = _re.search(r'<style[^>]*>(.*?)</style>', first_html, _re.DOTALL)
     css = style_match.group(1) if style_match else ""
     
-    # 각 파일에서 <body> 내용만 추출
+   # 각 파일에서 <body> 내용만 추출
     all_bodies = []
-    for hf in html_files:
+    for idx, hf in enumerate(html_files):
         html = hf.read_text(encoding='utf-8')
         body_match = _re.search(r'<body[^>]*>(.*?)</body>', html, _re.DOTALL)
         if body_match:
-            all_bodies.append(body_match.group(1))
+            body_content = body_match.group(1)
+            # 워크북 사이에 강제 페이지 나누기 (첫 번째는 제외)
+            if idx > 0:
+                body_content = '<div style="page-break-before: always; break-before: page; height: 0;"></div>' + body_content
+            all_bodies.append(body_content)
     
     # 합친 HTML 생성
     merged_path = _unique_path(output_dir, merge_name.replace('.html', ''), '.html')
