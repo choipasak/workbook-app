@@ -1079,6 +1079,30 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
 - 선택지에 정답 반드시 포함: 정답이 선택지에 없으면 문제 성립 불가! (예: 정답이 those인데 [that / where] 제시 → 절대 금지!)
 - 관계부사 why/where/when 선택지: 정답이 why인데 [which / where]를 제시하면 안 됨! 반드시 정답이 선택지에 포함되어야 함!
 
+[⚠️ 핵심 원칙: "바로 옆 자리"는 모두 출제 금지 — 가장 중요!]
+두 단어가 바로 옆에 붙어있어서 어법 규칙이 한눈에 보이는 자리는 모두 출제 금지!
+학생이 공식만 알면 즉답이라 어법 이해도 평가 불가. 자리 유형(조동사/시제/수일치 등)과 무관하게 "바로 옆"이라는 위치 자체가 문제.
+
+❌ 금지 사례 (모두 같은 원리 - 출제 포인트와 근거 단어가 "바로 옆"):
+- 조동사 바로 옆: must (N)[obey / obeying], will not (N)[solve / solves], should (N)[go / going]
+- 완료시제 has/have/had 바로 옆: has (N)[finished / finish], have (N)[gone / go], had (N)[lost / lose], nothing has (N)[revolutionized / revolutionize]
+- 진행시제 is/are/was/were 바로 옆: is (N)[studying / study], were (N)[playing / play], are (N)[running / run]
+- 수동태 be 바로 옆: was (N)[eaten / eat], is (N)[broken / break], were (N)[written / write]
+- 주어 바로 옆 수일치: the fire (N)[doesn't / don't], the rate (N)[increases / increase], the heat (N)[has / have]
+- 인칭대명사+동사 바로 옆 수일치: he (N)[gets / get], she (N)[is / are], it (N)[works / work]
+- until/when/if + 주어 바로 옆: until he (N)[gets / get] tired, when she (N)[arrives / arrive]
+
+✓ 출제 가능 (사이에 거리가 있어 학생이 분석해야 함):
+- 주어-동사 사이에 관계절/전치사구/삽입구가 있는 수일치
+  예: The approach, a technique which gardeners have relied on, (N)[remain / remains] effective.
+  예: Books on the shelves that gather dust (N)[need / needs] cleaning.
+- 분사 후치수식 능/수동: the book (N)[written / writing] by him is famous
+- 본동사 vs 준동사 구별: The animation (N)[creating / creates] vivid images
+- 분사구문 능동/수동: (N)[Compared / Comparing] with the old one, this is better
+- 조동사 + have p.p. vs 원형 (시제 차이): He must (N)[have done / do] it before yesterday
+
+검증 절차: 출제 후보 자리에서 반드시 자문 → "출제 포인트와 근거 단어가 바로 옆에 붙어있는가?"
+→ YES면 출제 금지! NO(사이에 관계절/전치사구/삽입구 있음)이면 출제 가능
 [어법 괄호형 Lv.8-1]
 - 원문 {sent_count}개 문장 모두 포함 (출제 안 하는 문장도 원문 그대로)
 - {bracket_count}개 괄호
