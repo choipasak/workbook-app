@@ -2779,9 +2779,8 @@ def merge_html_files(output_dir=None):
         body_match = _re.search(r'<body[^>]*>(.*?)</body>', html, _re.DOTALL)
         if body_match:
             body_content = body_match.group(1)
-            # 워크북 사이에 강제 페이지 나누기 (첫 번째는 제외)
-            if idx > 0:
-                body_content = '<div style="page-break-before: always; break-before: page; height: 0;"></div>' + body_content
+            # ⚠️ page-break-before div 제거: .page의 page-break-after: always 와 이중으로 작용해 빈 페이지 생성
+            # 자연스러운 .page 분할에만 의존
             all_bodies.append(body_content)
     
     # 합친 HTML 생성
