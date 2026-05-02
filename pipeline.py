@@ -1078,6 +1078,9 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
 - 고유명사+s: 고유명사 뒤에 -s 붙이는 문제 출제 금지! (예: Walthamstow / Walthamstows)
 - 선택지에 정답 반드시 포함: 정답이 선택지에 없으면 문제 성립 불가! (예: 정답이 those인데 [that / where] 제시 → 절대 금지!)
 - 관계부사 why/where/when 선택지: 정답이 why인데 [which / where]를 제시하면 안 됨! 반드시 정답이 선택지에 포함되어야 함!
+- 동의어 형용사/부사 출제 금지: varied/various, different/diverse, big/large, small/little, fast/quick, many/numerous 등 의미가 거의 같은 단어 쌍은 둘 다 정답이 되어 출제 불가!
+- 어법이 아닌 어휘 차이는 출제 금지: 두 단어가 모두 같은 문법 기능(둘 다 형용사, 둘 다 부사, 둘 다 명사)이고 의미만 비슷하면 어법 문제가 아닌 어휘 문제 — 출제 금지!
+
 
 [⚠️ 핵심 원칙: "바로 옆 자리"는 모두 출제 금지 — 가장 중요!]
 두 단어가 바로 옆에 붙어있어서 어법 규칙이 한눈에 보이는 자리는 모두 출제 금지!
