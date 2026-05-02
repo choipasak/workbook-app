@@ -1116,6 +1116,22 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
 4. 거리가 있는 수일치 (주어-동사 사이 5단어 이상)
 5. 분사구문 능/수동
 6. 형용사 vs 부사 (수식 대상 분석 필요한 경우만)
+7. 혼동 수일치 (★ 내신 빈출): 부분/수량 표현, 도치문, 등위접속사 주어
+   - 예: A number of students (N)[is / are] late. (= many students, 복수 취급)
+   - 예: The number of students (N)[is / are] increasing. (= 학생들의 수, 단수 취급)
+   - 예: Either A or B (N)[is / are] correct. (B에 일치)
+   - 예: Not only A but also B (N)[has / have] arrived. (B에 일치)
+   - 예: Among the trees (N)[stood / standing] a small house. (도치 - 본동사 필요)
+8. 동격 that vs 관계대명사 which (★ 내신 빈출): 뒤에 오는 절의 완전성으로 구별
+   - 동격 that: 추상명사(fact, idea, news, belief, opinion 등) 뒤 + 완전한 절 → that
+   - 관계대명사 which: 명사 뒤 + 불완전한 절 → which
+   - 예: The fact (N)[that / which] he is honest impressed everyone. (완전한 절 → that)
+   - 예: The fact (N)[that / which] he revealed impressed everyone. (불완전한 절 → which)
+9. 전치사+관계대명사 vs 그냥 관계대명사 (★ 내신 빈출): 뒤에 오는 절의 완전성으로 구별
+   - 전치사+관계대명사 (in which/on which/to which 등) + 완전한 절
+   - 그냥 관계대명사 (which/that) + 불완전한 절
+   - 예: The house (N)[in which / which] he lives is old. (lives 뒤 부사구 자리 빔 → in which)
+   - 예: The house (N)[in which / which] he bought is old. (bought 뒤 목적어 자리 빔 → which)
 
 → 학생이 1초 안에 풀 수 있는 자리는 무조건 피하세요.
 [어법 괄호형 Lv.8-1]
