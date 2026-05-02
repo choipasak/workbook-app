@@ -1066,16 +1066,21 @@
         .gram-ans-cell {
             border: 0.25mm solid var(--border-light);
             border-radius: 0.8mm;
-            padding: 1mm 1.5mm;
+            padding: 0.5mm 1mm;
             vertical-align: top;
-            line-height: 1.0;
+            line-height: 0.95;
         }
         .gram-ans-cell .gram-ans-row {
-            margin-bottom: 0.5mm;
+            margin-bottom: 0.2mm;
+            min-height: 0;
+        }
+        .gram-ans-cell .gram-ans-line {
+            min-height: 3mm;
         }
         .gram-ans-cell .word-table-row-fixed {
             margin: 0;
-            line-height: 1.0;
+            line-height: 0.95;
+            font-size: 7pt;
         }
 
         .gram-err-tbl {
@@ -1088,8 +1093,14 @@
         .gram-err-cell {
             border: 0.25mm solid var(--border-light);
             border-radius: 0.8mm;
-            padding: 1.5mm 2mm;
+            padding: 0.5mm 1mm;
             vertical-align: top;
+            line-height: 0.95;
+        }
+        .gram-err-cell .word-table-row-fixed {
+            margin: 0;
+            line-height: 0.95;
+            font-size: 7pt;
         }
 
         .gram-err-cell > p:first-child {
@@ -1300,10 +1311,18 @@
 
         .answer-block,
         .ablock {
-            break-inside: avoid;
             margin-bottom: 3mm;
             padding-bottom: 2.5mm;
             border-bottom: 0.2mm dashed var(--border-light);
+        }
+
+        /* 타이틀(.ast)은 다음 줄과 떨어지지 않게 */
+        .ablock .ast {
+            break-after: avoid;
+        }
+        /* p 단위로는 break-inside: avoid 유지 (한 줄 안에서만 안 잘림) */
+        .ablock p {
+            break-inside: avoid;
         }
 
         .answer-block:last-child,
@@ -2114,14 +2133,11 @@
         <div class="page-content">
             <div class="content-block">
                 <div class="section-title title-MD mt4">Stage 7-1 어법 (괄호 속 올바른 표현 고르기)</div>
-                <p class="step-badge">STEP 1</p>
-                <p class="step-title">어법 포인트 확인</p>
-                <p class="mb4 fs-85">아래 어법 문제를 순서대로 풀어보세요. 각 표현의 정답 근거를 반드시 확인하고 기록하세요.</p>
-                <p class="part-badge">PART 1</p>
-                <p class="mb2 fs-85 gram-note">기본적인 문장구조를 표시하여 <strong>정답의 근거를 분석</strong>해보기</p>
+                <p class="step-badge">STEP 1. 어법 포인트 확인</p>
+                <p class="mb2 fs-85">아래 어법 문제를 순서대로 풀어보세요. 각 표현의 정답 근거를 반드시 확인하고 기록하세요.</p>
+                <p class="part-badge">PART 1. 기본적인 문장구조를 표시하여 <strong>정답의 근거를 분석</strong>해보기</p>
                 <div class="passage passage-xs p-dense">{{ grammar_bracket_passage }}</div>
-                <p class="part-badge mt4">PART 2</p>
-                <p class="mb2 fs-85">각 번호에 해당하는 답을 <strong>'영어'</strong>로 작성</p>
+                <p class="part-badge mt4">PART 2. 각 번호에 해당하는 답을 <strong>'영어'</strong>로 작성</p>
                 {% set gram_ans_cols = 5 if grammar_bracket_count > 12 else 4 %}
                 <table class="gram-ans-tbl">
                     {% for i in range(0, grammar_bracket_count, gram_ans_cols) %}
@@ -2142,8 +2158,7 @@
                 </table>
             </div>
             <div class="content-block">
-                <p class="step-badge">STEP 2</p>
-                <p class="step-title">어법 서술형 — 틀린 곳 찾아 고치기</p>
+                <p class="step-badge">STEP 2. 어법 서술형 — 틀린 곳 찾아 고치기</p>
                 <p class="mb2 fs-85">다음 글에서 어법상 틀린 부분을 <strong>{{ grammar_error_count }}곳</strong> 찾아 바르게 고치시오. <span
                         class="warning-text">(밑줄 없음!) 기본적인 문장구조를 표시하여 <strong>정답의 근거</strong>를 분석해보기</span></p>
                 <!-- <p class="mb2 fs-85">기본적인 문장구조를 표시하여 <strong>정답의 근거</strong>를 분석해보기</p> -->
