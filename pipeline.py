@@ -6,7 +6,7 @@ PIPELINE_VERSION = "v10"
 # Step별 버전 관리: 해당 step 코드 수정 시 버전만 올리면 캐시 자동 무효화
 STEP_VERSIONS = {
     "step1_basic": "v3",
-    "step2_order": "v3",
+    "step2_order": "v4",
     "step3_blank": "v3",
     "step4_topic": "v3",
     "step5_grammar": "v4",
@@ -730,6 +730,9 @@ JSON 형식:
     # ★ 순서 선지를 코드로 직접 생성 (AI가 다양하게 안 만드는 문제 해결)
     _generate_order_block_shuffled(data)
 
+    # ★★ 3단락 순서 배열 ABC 라벨 셔플 + 5지선다 생성 (정답이 ABC가 안 되도록)
+    _generate_order_choices(data, passage=passage)
+
 
     # 🔒 검증: 전체배열 블록 수 vs 원문 문장 수 -> 알고리즘으로 생성했기에 필요X
     # block_count = len(data.get("full_order_blocks", []))
@@ -1092,6 +1095,24 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
    - 예: is too often (N)[considered / considering] ← 금지! (be + 부사 + 분사 패턴 명백)
    - 예: is rarely (N)[asked / asking] ← 금지!
    - 분사 능/수동을 출제하려면 반드시 "본동사 vs 준동사 구별"이나 "분사 후치수식 능/수동" 같이 학생이 분석해야 보이는 자리만!
+- ⚠⚠⚠ 시제 차이 출제 절대 금지 (★ 사용자 강력 요청): 같은 동사의 시제만 다른 쌍은 의미 차이일 뿐 어법 차이 아님!
+   - 현재 vs 과거: is/was, are/were, has/had, do/did, go/went 등 ← 절대 금지!
+   - 현재 vs 현재진행: studies/is studying, runs/is running ← 절대 금지! (둘 다 정답)
+   - 과거 vs 과거진행: studied/was studying, ran/was running ← 절대 금지! (둘 다 정답)
+   - 예: it (N)[is / was] famous ← 절대 금지! (시제 차이)
+   - 예: she (N)[hid / was hiding] ← 절대 금지! (둘 다 정답)
+- ⚠⚠⚠ 주어 자리 동명사 vs to부정사 출제 절대 금지 (★ 사용자 강력 요청): 주어 위치에서는 동명사와 to부정사 둘 다 정답!
+   - 예: (N)[Seeing / To see] is believing. ← 절대 금지! (둘 다 정답)
+   - 예: Overall, (N)[seeing / to see] the artworks was great. ← 절대 금지!
+   - ⚠ 단, 동사 뒤 to부정사/동명사 출제는 OK: decide (N)[to study / studying] 같은 자리 (특정 동사가 to부정사/동명사 강제하는 경우)
+- ⚠⚠⚠ 관계대명사 자리 that vs which 출제 절대 금지 (★ 사용자 강력 요청): 주격/목적격 관계대명사 자리에서는 that과 which가 둘 다 정답!
+   - 예: museums (N)[that / which] attract visitors ← 절대 금지! (둘 다 정답)
+   - 예: the book (N)[that / which] I read ← 절대 금지! (둘 다 정답)
+   - ⚠ 차라리 ★★★ 권장 자리: 관계대명사 자리에서 what vs that(또는 which) 출제 (선행사 유무로 구별!)
+     - 예: I know (N)[what / that] he said. (뒤 절 불완전, 선행사 X → what)
+     - 예: the thing (N)[that / what] he said. (선행사 thing 있음 → that)
+     - 예: (N)[What / That] he said is true. (선행사 X → What이 주어, 'What he said' = 명사절)
+     - 학생이 선행사 유무 + 절 완전성으로 구별 → 진짜 어법 출제!
 
 
 [⚠️ 핵심 원칙: "바로 옆 자리"는 모두 출제 금지 — 가장 중요!]
@@ -1821,6 +1842,87 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
             data["grammar_bracket_answers"] = [a for a in data.get("grammar_bracket_answers", []) if a.get("num") not in removed_neg]
             data["grammar_bracket_count"] = len(re.findall(r'\(\d+\)\[', final_bp_neg))
             _safe_print(f"  ✅ 의미 차이 괄호 {len(removed_neg)}개 제거 완료")
+
+    # ★ 추가 자동 제거: 시제 차이 / 주어자리 동명사·to부정사 / 관계대명사 that-which 쌍
+    final_bp_extra = data.get("grammar_bracket_passage", "")
+    if final_bp_extra:
+        all_br_extra = re.findall(r'\((\d+)\)\[([^\]]+)\]', final_bp_extra)
+        removed_extra = []
+        for num_str, content in all_br_extra:
+            parts = [p.strip().lower() for p in content.split('/')]
+            if len(parts) != 2:
+                continue
+            a, b = parts[0], parts[1]
+            should_remove = False
+            reason = ""
+
+            # 1. 시제 차이 페어 (의미 차이일 뿐, 어법 X)
+            tense_pairs_set = [
+                {'is', 'was'}, {'are', 'were'}, {'am', 'was'},
+                {'has', 'had'}, {'have', 'had'},
+                {'do', 'did'}, {'does', 'did'},
+                {'go', 'went'}, {'goes', 'went'},
+                {'come', 'came'}, {'comes', 'came'},
+                {'see', 'saw'}, {'sees', 'saw'},
+                {'know', 'knew'}, {'knows', 'knew'},
+            ]
+            if {a, b} in tense_pairs_set:
+                should_remove = True
+                reason = f"시제 차이 (의미 차이): {a}/{b}"
+
+            # 2. 주어자리 동명사 vs to부정사 (X-ing / to X 어근 같음)
+            if not should_remove:
+                ing_word, to_word = None, None
+                if a.endswith('ing') and b.startswith('to '):
+                    ing_word, to_word = a, b
+                elif b.endswith('ing') and a.startswith('to '):
+                    ing_word, to_word = b, a
+                if ing_word and to_word:
+                    ing_root = ing_word[:-3].rstrip('e')  # studying → study
+                    to_root = to_word[3:].strip()  # to study → study
+                    # 어근 비교 (앞 3글자 또는 완전 일치)
+                    if (ing_root and to_root and
+                        (ing_root[:3] == to_root[:3] or ing_root == to_root)):
+                        # 위치 확인: 문장 시작 부근이면 주어 자리
+                        bracket_pos = final_bp_extra.find(f'({num_str})[')
+                        if bracket_pos >= 0:
+                            last_punct = max(
+                                final_bp_extra.rfind('.', 0, bracket_pos),
+                                final_bp_extra.rfind('!', 0, bracket_pos),
+                                final_bp_extra.rfind('?', 0, bracket_pos),
+                            )
+                            words_before = final_bp_extra[max(0, last_punct + 1):bracket_pos].strip().split()
+                            # 문장 시작 ~ 3단어 이내면 주어 자리로 간주
+                            if len(words_before) <= 3:
+                                should_remove = True
+                                reason = f"주어자리 동명사 vs to부정사 (둘 다 가능): {a}/{b}"
+
+            # 3. 관계대명사 that vs which 쌍 (사용자 명시 금지 자리)
+            if not should_remove:
+                if {a, b} == {'that', 'which'}:
+                    # 괄호 앞 단어 확인 - 명사(선행사)인 경우 관계대명사
+                    # 단순화: 그냥 모두 차단 (사용자 명시 요구)
+                    should_remove = True
+                    reason = f"관계대명사 자리 that vs which (둘 다 가능): {a}/{b}"
+
+            if should_remove:
+                # 정답 단어로 복원
+                correct_word = ""
+                for ans in data.get("grammar_bracket_answers", []):
+                    if ans.get("num") == int(num_str):
+                        correct_word = ans.get("answer", "")
+                        break
+                if not correct_word:
+                    correct_word = content.split('/')[0].strip()
+                if correct_word:
+                    final_bp_extra = re.sub(r'\(' + num_str + r'\)\[[^\]]+\]', correct_word, final_bp_extra)
+                    removed_extra.append(int(num_str))
+                    _safe_print(f"  🚫 추가 차단 괄호({num_str}) 제거: {reason} → '{correct_word}'")
+        if removed_extra:
+            data["grammar_bracket_passage"] = final_bp_extra
+            data["grammar_bracket_answers"] = [a for a in data.get("grammar_bracket_answers", []) if a.get("num") not in removed_extra]
+            data["grammar_bracket_count"] = len(re.findall(r'\(\d+\)\[', final_bp_extra))
+            _safe_print(f"  ✅ 추가 차단 괄호 {len(removed_extra)}개 제거 완료")
 
     # ★ "뒤에 by" 능동/수동 자동 제거 — 뒤에 by 행위자 있으면 수동태 1초 컷
     final_bp_by = data.get("grammar_bracket_passage", "")
