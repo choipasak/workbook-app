@@ -2772,18 +2772,28 @@ def merge_html_files(output_dir=None):
     style_match = _re.search(r'<style[^>]*>(.*?)</style>', first_html, _re.DOTALL)
     css = style_match.group(1) if style_match else ""
     
-   # 각 파일에서 <body> 내용만 추출
+    # 첫 번째 파일에서 자바스크립트 추출 (한 번만 넣기 위해)
+    extracted_script = ""
+    if html_files:
+        first_html = html_files[0].read_text(encoding='utf-8')
+        script_match = _re.search(r'<script>.*?</script>', first_html, _re.DOTALL)
+        if script_match:
+            extracted_script = script_match.group(0)
+    
+   # 각 파일에서 <body> 내용만 추출 (단, <script>...</script> 제거)
     all_bodies = []
     for idx, hf in enumerate(html_files):
         html = hf.read_text(encoding='utf-8')
         body_match = _re.search(r'<body[^>]*>(.*?)</body>', html, _re.DOTALL)
         if body_match:
             body_content = body_match.group(1)
+            # ⚠️ <script>...</script> 제거: 합본 시 자바스크립트가 여러 번 들어가면 paginate가 중복 실행되어 layout 깨짐
+            body_content = _re.sub(r'<script>.*?</script>', '', body_content, flags=_re.DOTALL)
             # ⚠️ page-break-before div 제거: .page의 page-break-after: always 와 이중으로 작용해 빈 페이지 생성
             # 자연스러운 .page 분할에만 의존
             all_bodies.append(body_content)
     
-    # 합친 HTML 생성
+    # 합친 HTML 생성 (자바스크립트는 마지막에 한 번만)
     merged_path = _unique_path(output_dir, merge_name.replace('.html', ''), '.html')
     merged = f"""<!DOCTYPE html>
 <html lang="ko">
@@ -2796,6 +2806,7 @@ def merge_html_files(output_dir=None):
 </head>
 <body>
 {''.join(all_bodies)}
+{extracted_script}
 </body>
 </html>"""
     
