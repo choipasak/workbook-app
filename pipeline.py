@@ -1539,6 +1539,70 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
             data["grammar_bracket_count"] = len(re.findall(r'\(\d+\)\[', final_bp))
             _safe_print(f"  ✅ 지시대명사 {len(removed_demo)}개 복원 완료")
 
+   # ★ "바로 옆 자리" 금지 자동 제거 (대명사+동사, 조동사+동사, be+분사 등)
+    final_bp_na = data.get("grammar_bracket_passage", "")
+    if final_bp_na:
+        all_br_na = re.findall(r'\((\d+)\)\[([^\]]+)\]', final_bp_na)
+        removed_na = []
+        # 금지 단어 패턴: 괄호 바로 앞 단어가 이런 거면 "바로 옆" 자리
+        forbidden_left = {
+            # 인칭대명사
+            'i', 'you', 'he', 'she', 'it', 'we', 'they',
+            # 조동사
+            'will', 'would', 'can', 'could', 'shall', 'should', 'may', 'might', 'must',
+            # 완료시제
+            'has', 'have', 'had',
+            # 진행/수동
+            'is', 'are', 'was', 'were', 'am', 'be', 'been', 'being',
+            # do
+            'do', 'does', 'did',
+        }
+        for num_str, content in all_br_na:
+            bracket_pos = final_bp_na.find(f'({num_str})[')
+            if bracket_pos < 1:
+                continue
+            # 괄호 바로 앞 텍스트 추출 (괄호 직전 5단어)
+            before_text = final_bp_na[max(0, bracket_pos-50):bracket_pos].rstrip()
+            words_before = before_text.split()
+            if not words_before:
+                continue
+            # 마지막 단어 (구두점 제거, 소문자)
+            last_word = re.sub(r'[^\w]', '', words_before[-1]).lower()
+            # 부사 1개만 끼어있는 경우도 체크: "they also" → also 무시하고 they 봄
+            common_adverbs = {'also', 'always', 'often', 'never', 'still', 'just', 
+                             'only', 'really', 'quite', 'very', 'rather', 'now',
+                             'then', 'too', 'so', 'even', 'already', 'yet',
+                             'usually', 'sometimes', 'generally', 'typically',
+                             'simply', 'merely', 'truly', 'actually'}
+            check_word = last_word
+            if last_word in common_adverbs and len(words_before) >= 2:
+                # 부사면 그 앞 단어 체크
+                check_word = re.sub(r'[^\w]', '', words_before[-2]).lower()
+            
+            if check_word in forbidden_left:
+                # "바로 옆" 자리 → 괄호 제거
+                # 정답 단어로 복원 (answers에서 찾기)
+                correct_word = ""
+                for ans in data.get("grammar_bracket_answers", []):
+                    if ans.get("num") == int(num_str):
+                        correct_word = ans.get("answer", "")
+                        break
+                if not correct_word:
+                    # answers에 없으면 첫 번째 선지를 정답으로 사용
+                    parts = [p.strip() for p in content.split('/')]
+                    correct_word = parts[0] if parts else ""
+                
+                if correct_word:
+                    final_bp_na = re.sub(r'\(' + num_str + r'\)\[[^\]]+\]', correct_word, final_bp_na)
+                    removed_na.append(int(num_str))
+                    _safe_print(f"  🚫 '바로 옆' 자리 괄호({num_str}) 제거: 앞 단어='{check_word}' → '{correct_word}'")
+        
+        if removed_na:
+            data["grammar_bracket_passage"] = final_bp_na
+            data["grammar_bracket_answers"] = [a for a in data.get("grammar_bracket_answers", []) if a.get("num") not in removed_na]
+            data["grammar_bracket_count"] = len(re.findall(r'\(\d+\)\[', final_bp_na))
+            _safe_print(f"  ✅ '바로 옆' 자리 {len(removed_na)}개 제거 완료")
+
     # ★ whom/who 둘다정답 괄호 제거
     final_bp3 = data.get("grammar_bracket_passage", "")
     if final_bp3:
