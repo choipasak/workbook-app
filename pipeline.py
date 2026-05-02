@@ -1146,6 +1146,32 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
    - 그냥 관계대명사 (which/that) + 불완전한 절
    - 예: The house (N)[in which / which] he lives is old. (lives 뒤 부사구 자리 빔 → in which)
    - 예: The house (N)[in which / which] he bought is old. (bought 뒤 목적어 자리 빔 → which)
+10. ★ that vs what 구별 (★ 내신 최빈출!): 선행사 유무 + 뒤 절의 완전성으로 구별
+   - that: 선행사 명사 있음 + 뒤 절은 완전 또는 불완전
+   - what: 선행사 명사 없음 + 뒤 절은 불완전 (= the thing that)
+   - 예: The most important thing (N)[that / what] he said was honesty. (선행사 thing → that)
+   - 예: The most important is (N)[what / that] he said. (선행사 없음, 'what he said'가 보어 → what)
+   - 예: I believe (N)[that / what] he is honest. (뒤에 완전한 절 → that, 동격절)
+   - 예: I believe (N)[what / that] he said. (뒤에 said의 목적어 빠짐 → what)
+11. ★ to부정사만 받는 동사 vs 동명사만 받는 동사 (★ 내신 빈출): 동사 종류로 정답 결정
+   - to부정사만 받음: decide, agree, hope, want, plan, promise, refuse, expect, manage, fail, choose, learn, offer
+   - 동명사만 받음: enjoy, finish, mind, avoid, suggest, deny, postpone, give up, consider, admit, recommend
+   - 예: We decided (N)[to study / studying] hard. (decide → to부정사)
+   - 예: I enjoyed (N)[playing / to play] the piano. (enjoy → 동명사)
+   - 예: She finished (N)[writing / to write] the report. (finish → 동명사)
+12. ★ 멀리 있는 주어-동사 수일치 (★ 내신 최빈출!): 주어와 동사 사이가 5단어 이상 떨어져서 학생이 분석해야 정답이 보이는 자리
+   - 예: people who are lost will always (N)[walk / walking] in a circle (주어 'people', 사이에 7단어 → 어려움)
+   - 예: a process which consciously attempts to locate thoughts (N)[remain / remains] effective (주어 'process')
+   - ⚠ 주어가 괄호 바로 앞에 있으면 절대 출제 금지! 예: this (N)[causes / causing] ← 금지!, hand (N)[factor / factors] ← 금지!, Gatty (N)[confirms / confirm] ← 금지!
+
+[⚠️ 추가 핵심 금지 — 명사 주어 바로 옆 수일치]
+단복수 차이 쌍 (X / Xs 형태: confirm/confirms, factor/factors, cause/causes 등)은 주어가 멀리 있을 때만 출제 가능!
+- 괄호 바로 앞 5단어 안에 명사/대명사가 있으면 그게 주어 → 학생이 1초만에 단복수 판단 → 절대 출제 금지!
+- 인칭대명사(he/she/it/they/we/you/I/one)뿐 아니라 일반 명사(Harold/this/the hand/the book/people/students 등)도 모두 동일하게 금지!
+- 예: this (N)[causes / causing] → this 바로 앞 → 금지!
+- 예: Harold Gatty (N)[confirms / confirm] → Gatty 바로 앞 → 금지!
+- 예: Our dominant hand (N)[factor / factors] → hand 바로 앞 → 금지!
+- 출제하려면 반드시 주어와 동사 사이가 5단어 이상 떨어진 자리만!
 
 → 학생이 1초 안에 풀 수 있는 자리는 무조건 피하세요.
 [어법 괄호형 Lv.8-1]
@@ -1758,6 +1784,33 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
             data["grammar_bracket_passage"] = final_bp3
             data["grammar_bracket_answers"] = [a for a in data.get("grammar_bracket_answers", []) if a.get("num") not in removed_ww]
             data["grammar_bracket_count"] = len(re.findall(r'\(\d+\)\[', final_bp3))
+
+    # ★ 최종 재번호 매기기: 모든 자동 제거 후 (1)부터 시작하도록 번호 정리
+    final_bp_renum = data.get("grammar_bracket_passage", "")
+    if final_bp_renum:
+        remaining_nums = [int(m) for m in re.findall(r'\((\d+)\)\[', final_bp_renum)]
+        expected_nums = list(range(1, len(remaining_nums) + 1))
+        if remaining_nums and remaining_nums != expected_nums:
+            renumber_map = {old: new for new, old in zip(remaining_nums, expected_nums)}
+            new_passage = final_bp_renum
+            # 1단계: 임시 마커로 교체 (충돌 방지)
+            for old_num in remaining_nums:
+                new_num = renumber_map[old_num]
+                if old_num != new_num:
+                    new_passage = new_passage.replace(f'({old_num})[', f'(__TMP{new_num}__)[', 1)
+            # 2단계: 임시 마커를 최종 번호로
+            new_passage = re.sub(r'\(__TMP(\d+)__\)\[', lambda m: f'({m.group(1)})[', new_passage)
+            # answers도 재번호
+            new_answers = []
+            for ans in data.get("grammar_bracket_answers", []):
+                old_n = ans.get("num", 0)
+                if old_n in renumber_map:
+                    ans["num"] = renumber_map[old_n]
+                    new_answers.append(ans)
+            data["grammar_bracket_passage"] = new_passage
+            data["grammar_bracket_answers"] = new_answers
+            data["grammar_bracket_count"] = len(new_answers)
+            _safe_print(f"  🔢 최종 재번호 매기기 완료: {dict(list(renumber_map.items())[:5])}...")
 
   # ★ 최종 괄호 수 체크: 모든 제거 후 8개 미만이면 재생성 (최대 3회)
     final_bracket_count = data.get("grammar_bracket_count", 0)
