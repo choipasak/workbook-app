@@ -9,10 +9,10 @@ STEP_VERSIONS = {
     "step2_order": "v4",
     "step3_blank": "v3",
     "step4_topic": "v3",
-    "step5_grammar": "v4",
+    "step5_grammar": "v5",
     "step6_vocab_content": "v3",
     "step7_writing": "v3",
-    "step8_answers": "v5",
+    "step8_answers": "v6",
     "secret_note_a": "v1",
     "secret_note_b": "v1",
     "secret_note_c": "v5",  # v5: 유의어 6-7개, 고난도 4-5개, 요지 2배 길이, 가로 배치
