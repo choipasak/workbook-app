@@ -1083,6 +1083,15 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
 - 어법이 아닌 어휘 차이는 출제 금지: 두 단어가 모두 같은 문법 기능(둘 다 형용사, 둘 다 부사, 둘 다 명사)이고 의미만 비슷하면 어법 문제가 아닌 어휘 문제 — 출제 금지!
 - 같은 어근 + 접두사(in-/un-/im-/dis-/non-) 차이 출제 금지: accurate/inaccurate, possible/impossible, legal/illegal, regular/irregular, fair/unfair, like/unlike, agree/disagree 등은 의미가 반대인 어휘 차이일 뿐, 어법 문제가 아님! 학생이 문맥 이해로 푸는 어휘 문제 → 출제 금지!
 - 의미가 반대인 어휘 쌍은 어법 출제 불가: accurate/inaccurate처럼 둘 다 형용사이고 의미만 반대면 어법 문제 성립 안 됨!
+- ⚠ 조동사/동사의 부정형 vs 긍정형 출제 절대 금지: could/couldn't, can/cannot, will/won't, has/hasn't, do/don't, is/isn't, are/aren't 등은 의미 차이일 뿐 어법 차이 아님! 학생이 문맥 이해로 푸는 어휘 문제 → 출제 금지!
+   - 예: This (N)[couldn't / could] be more wrong. ← 절대 금지! 의미 차이임
+   - 예: He (N)[has / hasn't] finished. ← 절대 금지!
+- ⚠ 추상명사/불가산명사 + s 출제 금지: well-being/well-beings, advice/advices, information/informations, knowledge/knowledges, equipment/equipments, furniture/furnitures, research/researches 같은 자리는 어휘 문제이지 어법 문제 아님!
+   - 예: our (N)[well-being / well-beings] ← 절대 금지! well-being은 추상명사로 단수형이 정상
+- ⚠ 너무 쉬운 분사 자리 출제 금지: "is/was/were + 부사 + 분사" 같이 be동사 바로 옆 + 부사 1개 + 분사는 너무 쉬움. 학생이 1초만에 정답 보임 → 출제 금지!
+   - 예: is too often (N)[considered / considering] ← 금지! (be + 부사 + 분사 패턴 명백)
+   - 예: is rarely (N)[asked / asking] ← 금지!
+   - 분사 능/수동을 출제하려면 반드시 "본동사 vs 준동사 구별"이나 "분사 후치수식 능/수동" 같이 학생이 분석해야 보이는 자리만!
 
 
 [⚠️ 핵심 원칙: "바로 옆 자리"는 모두 출제 금지 — 가장 중요!]
@@ -1166,7 +1175,33 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
 12. ★ 멀리 있는 주어-동사 수일치 (★ 내신 최빈출!): 주어와 동사 사이가 5단어 이상 떨어져서 학생이 분석해야 정답이 보이는 자리
    - 예: people who are lost will always (N)[walk / walking] in a circle (주어 'people', 사이에 7단어 → 어려움)
    - 예: a process which consciously attempts to locate thoughts (N)[remain / remains] effective (주어 'process')
+   - 예: The question of how its design affects human beings (N)[is / are] rarely asked. (주어 question, 사이에 7단어 → 어려움)
    - ⚠ 주어가 괄호 바로 앞에 있으면 절대 출제 금지! 예: this (N)[causes / causing] ← 금지!, hand (N)[factor / factors] ← 금지!, Gatty (N)[confirms / confirm] ← 금지!
+13. ★★ 학문명 -ics 단수 취급 (★★ 내신 최빈출! 의외 출제!): -s로 끝나는 학문명은 단수 취급
+   - 학문명 리스트: aesthetics, mathematics, physics, statistics, economics, politics, ethics, electronics, linguistics, athletics, gymnastics, acoustics
+   - 예: The aesthetics of a new project (N)[is / are] too often considered irrelevant. (aesthetics 단수 → is)
+   - 예: Mathematics (N)[is / are] my favorite subject. (단수 → is)
+   - 예: Physics (N)[explains / explain] the laws of nature. (단수 → explains)
+   - 학생이 -s 보고 복수로 착각하기 쉬워서 좋은 출제!
+14. ★★ so/such ~ that 구문의 결과 접속사 that (★★ 내신 빈출): so~that의 that은 관계대명사가 아니라 결과 접속사 → which 안 됨!
+   - 예: The book is so good (N)[that / which] everyone loves it. (so~that 결과 → that, which 불가!)
+   - 예: It matters so profoundly (N)[that / which] safety must not be our only priority. (so~that 결과 → that)
+   - 예: She was such a kind person (N)[that / which] we all admired her. (such~that → that)
+   - ⚠ 학생이 that을 무조건 관계대명사로 착각하기 쉬워서 좋은 출제!
+15. ★★ 명사절 접속사 that vs 관계대명사 which (★★ 내신 최빈출!): think/believe/say/know 등 동사 뒤 명사절의 that → which 불가
+   - 명사절 접속사 that: 동사(think/believe/say/know/feel/find/realize 등) + that + 완전한 절 → 목적어절
+   - 관계대명사 which: 명사 + which + 불완전한 절
+   - 예: People think (N)[that / which] design makes architecture. (think 뒤 명사절 → that)
+   - 예: I believe (N)[that / which] he is honest. (believe 뒤 → that)
+   - 예: He said (N)[that / which] she would come. (said 뒤 → that)
+   - 핵심: that 앞이 동사(타동사)면 명사절 접속사. 학생이 관계대명사 which와 헷갈림 → 좋은 출제!
+16. ★ 1형식/2형식 동사 + 형용사/부사 구별 (★ 내신 빈출): 동사가 1형식 자동사이면 부사가 와야 함
+   - 1형식 자동사: matter, function, work, exist, happen, occur, appear (보어 X)
+   - 2형식 동사: be, become, seem, look, feel, taste, smell, sound, get (형용사 보어)
+   - 예: The design matters so (N)[profoundly / profound]. (matter 1형식 → 부사)
+   - 예: Insects function (N)[differently / different] from humans. (function 1형식 → 부사)
+   - 예: She looks (N)[happy / happily]. (look 2형식 → 형용사)
+   - 학생이 동사 형식 모르면 틀림 → 좋은 출제!
 
 [⚠️ 추가 핵심 금지 — 명사 주어 바로 옆 수일치]
 단복수 차이 쌍 (X / Xs 형태: confirm/confirms, factor/factors, cause/causes 등)은 주어가 멀리 있을 때만 출제 가능!
@@ -1719,6 +1754,73 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
             data["grammar_bracket_answers"] = [a for a in data.get("grammar_bracket_answers", []) if a.get("num") not in removed_na]
             data["grammar_bracket_count"] = len(re.findall(r'\(\d+\)\[', final_bp_na))
             _safe_print(f"  ✅ '바로 옆' 자리 {len(removed_na)}개 제거 완료")
+
+    # ★ 의미 차이 쌍(부정/긍정 조동사 등) 자동 제거 — 어법이 아닌 의미 문제
+    final_bp_neg = data.get("grammar_bracket_passage", "")
+    if final_bp_neg:
+        all_br_neg = re.findall(r'\((\d+)\)\[([^\]]+)\]', final_bp_neg)
+        removed_neg = []
+        # 부정/긍정 쌍: 의미가 반대인 단어들
+        negation_pairs = [
+            # 조동사 부정/긍정
+            ('could', "couldn't"), ('could', 'could not'),
+            ('can', "can't"), ('can', 'cannot'),
+            ('will', "won't"), ('will', 'will not'),
+            ('would', "wouldn't"), ('would', 'would not'),
+            ('should', "shouldn't"), ('should', 'should not'),
+            ('may', "may not"), ('might', "mightn't"), ('might', 'might not'),
+            ('must', "mustn't"), ('must', 'must not'),
+            # be동사 부정/긍정
+            ('is', "isn't"), ('are', "aren't"), ('was', "wasn't"), ('were', "weren't"),
+            ('is', 'is not'), ('are', 'are not'),
+            # 일반 조동사 부정/긍정
+            ('has', "hasn't"), ('have', "haven't"), ('had', "hadn't"),
+            ('do', "don't"), ('does', "doesn't"), ('did', "didn't"),
+        ]
+        # 추상명사 + s 패턴
+        uncountable_nouns = {
+            'well-being', 'advice', 'information', 'knowledge', 'equipment',
+            'furniture', 'research', 'evidence', 'progress', 'news', 'feedback',
+            'homework', 'baggage', 'luggage', 'machinery', 'staff', 'traffic',
+        }
+        for num_str, content in all_br_neg:
+            parts = [p.strip().lower() for p in content.split('/')]
+            if len(parts) != 2:
+                continue
+            a, b = parts[0], parts[1]
+            should_remove = False
+            reason = ""
+            # 1. 부정/긍정 쌍 체크
+            for pos, neg in negation_pairs:
+                if (a == pos and b == neg) or (a == neg and b == pos):
+                    should_remove = True
+                    reason = f"의미 차이 (부정/긍정): {a}/{b}"
+                    break
+            # 2. 추상명사 + s 체크
+            if not should_remove:
+                for noun in uncountable_nouns:
+                    if (a == noun and b == noun + 's') or (a == noun + 's' and b == noun):
+                        should_remove = True
+                        reason = f"추상명사 복수형: {a}/{b}"
+                        break
+            if should_remove:
+                # 정답 단어로 복원
+                correct_word = ""
+                for ans in data.get("grammar_bracket_answers", []):
+                    if ans.get("num") == int(num_str):
+                        correct_word = ans.get("answer", "")
+                        break
+                if not correct_word:
+                    correct_word = content.split('/')[0].strip()
+                if correct_word:
+                    final_bp_neg = re.sub(r'\(' + num_str + r'\)\[[^\]]+\]', correct_word, final_bp_neg)
+                    removed_neg.append(int(num_str))
+                    _safe_print(f"  🚫 의미 차이 괄호({num_str}) 제거: {reason} → '{correct_word}'")
+        if removed_neg:
+            data["grammar_bracket_passage"] = final_bp_neg
+            data["grammar_bracket_answers"] = [a for a in data.get("grammar_bracket_answers", []) if a.get("num") not in removed_neg]
+            data["grammar_bracket_count"] = len(re.findall(r'\(\d+\)\[', final_bp_neg))
+            _safe_print(f"  ✅ 의미 차이 괄호 {len(removed_neg)}개 제거 완료")
 
     # ★ "뒤에 by" 능동/수동 자동 제거 — 뒤에 by 행위자 있으면 수동태 1초 컷
     final_bp_by = data.get("grammar_bracket_passage", "")
