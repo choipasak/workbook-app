@@ -1606,6 +1606,57 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
             data["grammar_bracket_count"] = len(re.findall(r'\(\d+\)\[', final_bp_na))
             _safe_print(f"  ✅ '바로 옆' 자리 {len(removed_na)}개 제거 완료")
 
+  # ★ "바로 옆 자리" 금지 자동 제거 (인칭대명사+동사, 조동사+동사, be+분사 등)
+    final_bp_na = data.get("grammar_bracket_passage", "")
+    if final_bp_na:
+        all_br_na = re.findall(r'\((\d+)\)\[([^\]]+)\]', final_bp_na)
+        removed_na = []
+        forbidden_left = {
+            'i', 'you', 'he', 'she', 'it', 'we', 'they',
+            'will', 'would', 'can', 'could', 'shall', 'should', 'may', 'might', 'must',
+            'has', 'have', 'had',
+            'is', 'are', 'was', 'were', 'am', 'be', 'been', 'being',
+            'do', 'does', 'did',
+        }
+        common_adverbs = {'also', 'always', 'often', 'never', 'still', 'just', 
+                         'only', 'really', 'quite', 'very', 'rather', 'now',
+                         'then', 'too', 'so', 'even', 'already', 'yet',
+                         'usually', 'sometimes', 'generally', 'typically',
+                         'simply', 'merely', 'truly', 'actually', 'not'}
+        for num_str, content in all_br_na:
+            bracket_pos = final_bp_na.find(f'({num_str})[')
+            if bracket_pos < 1:
+                continue
+            before_text = final_bp_na[max(0, bracket_pos-50):bracket_pos].rstrip()
+            words_before = before_text.split()
+            if not words_before:
+                continue
+            last_word = re.sub(r'[^\w]', '', words_before[-1]).lower()
+            check_word = last_word
+            if last_word in common_adverbs and len(words_before) >= 2:
+                check_word = re.sub(r'[^\w]', '', words_before[-2]).lower()
+            
+            if check_word in forbidden_left:
+                correct_word = ""
+                for ans in data.get("grammar_bracket_answers", []):
+                    if ans.get("num") == int(num_str):
+                        correct_word = ans.get("answer", "")
+                        break
+                if not correct_word:
+                    parts = [p.strip() for p in content.split('/')]
+                    correct_word = parts[0] if parts else ""
+                
+                if correct_word:
+                    final_bp_na = re.sub(r'\(' + num_str + r'\)\[[^\]]+\]', correct_word, final_bp_na)
+                    removed_na.append(int(num_str))
+                    _safe_print(f"  🚫 '바로 옆' 자리 괄호({num_str}) 제거: 앞 단어='{check_word}' → '{correct_word}'")
+        
+        if removed_na:
+            data["grammar_bracket_passage"] = final_bp_na
+            data["grammar_bracket_answers"] = [a for a in data.get("grammar_bracket_answers", []) if a.get("num") not in removed_na]
+            data["grammar_bracket_count"] = len(re.findall(r'\(\d+\)\[', final_bp_na))
+            _safe_print(f"  ✅ '바로 옆' 자리 {len(removed_na)}개 제거 완료")
+
     # ★ whom/who 둘다정답 괄호 제거
     final_bp3 = data.get("grammar_bracket_passage", "")
     if final_bp3:
