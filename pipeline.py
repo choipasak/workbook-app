@@ -1141,11 +1141,15 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
    - 관계대명사 which: 명사 뒤 + 불완전한 절 → which
    - 예: The fact (N)[that / which] he is honest impressed everyone. (완전한 절 → that)
    - 예: The fact (N)[that / which] he revealed impressed everyone. (불완전한 절 → which)
-9. 전치사+관계대명사 vs 그냥 관계대명사 (★ 내신 빈출): 뒤에 오는 절의 완전성으로 구별
-   - 전치사+관계대명사 (in which/on which/to which 등) + 완전한 절
-   - 그냥 관계대명사 (which/that) + 불완전한 절
-   - 예: The house (N)[in which / which] he lives is old. (lives 뒤 부사구 자리 빔 → in which)
+9. ★★ 전치사 + 목적격 관계대명사 vs 목적격 관계대명사 (★★ 내신 최최빈출! 이런 자리 있으면 무조건 출제!): 뒤 절의 완전성으로 구별
+   - 전치사 + 목적격 관계대명사 (in which/on which/to which/by which/for which/at which/of which 등) + 완전한 절
+     → 전치사+which는 부사 역할이라 뒤 절이 완전함 (주어, 동사, 목적어 다 있음)
+   - 그냥 목적격 관계대명사 (which/that) + 불완전한 절
+     → which/that이 목적어 역할이라 뒤 절에서 목적어 자리 빔
+   - 예: The house (N)[in which / which] he lives is old. (lives는 자동사+부사구 → 완전한 절 → in which)
    - 예: The house (N)[in which / which] he bought is old. (bought 뒤 목적어 자리 빔 → which)
+   - 예: many ways (N)[in which / which] insect bodies are structured (are structured는 완전한 절 → in which)
+   - ⚠ 지문에 "in which", "on which", "by which", "for which" 같은 패턴이 있으면 무조건 우선 출제!
 10. ★ that vs what 구별 (★ 내신 최빈출!): 선행사 유무 + 뒤 절의 완전성으로 구별
    - that: 선행사 명사 있음 + 뒤 절은 완전 또는 불완전
    - what: 선행사 명사 없음 + 뒤 절은 불완전 (= the thing that)
@@ -1607,6 +1611,8 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
         forbidden_left = {
             # 인칭대명사 + 부정대명사
             'i', 'you', 'he', 'she', 'it', 'we', 'they', 'one',
+            # 지시대명사
+            'this', 'that', 'these', 'those',
             # 조동사
             'will', 'would', 'can', 'could', 'shall', 'should', 'may', 'might', 'must',
             # 완료시제
@@ -1669,6 +1675,7 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
         removed_na = []
         forbidden_left = {
             'i', 'you', 'he', 'she', 'it', 'we', 'they', 'one',
+            'this', 'that', 'these', 'those',
             'will', 'would', 'can', 'could', 'shall', 'should', 'may', 'might', 'must',
             'has', 'have', 'had',
             'is', 'are', 'was', 'were', 'am', 'be', 'been', 'being',
