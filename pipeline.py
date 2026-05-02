@@ -1081,6 +1081,8 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
 - 관계부사 why/where/when 선택지: 정답이 why인데 [which / where]를 제시하면 안 됨! 반드시 정답이 선택지에 포함되어야 함!
 - 동의어 형용사/부사 출제 금지: varied/various, different/diverse, big/large, small/little, fast/quick, many/numerous 등 의미가 거의 같은 단어 쌍은 둘 다 정답이 되어 출제 불가!
 - 어법이 아닌 어휘 차이는 출제 금지: 두 단어가 모두 같은 문법 기능(둘 다 형용사, 둘 다 부사, 둘 다 명사)이고 의미만 비슷하면 어법 문제가 아닌 어휘 문제 — 출제 금지!
+- 같은 어근 + 접두사(in-/un-/im-/dis-/non-) 차이 출제 금지: accurate/inaccurate, possible/impossible, legal/illegal, regular/irregular, fair/unfair, like/unlike, agree/disagree 등은 의미가 반대인 어휘 차이일 뿐, 어법 문제가 아님! 학생이 문맥 이해로 푸는 어휘 문제 → 출제 금지!
+- 의미가 반대인 어휘 쌍은 어법 출제 불가: accurate/inaccurate처럼 둘 다 형용사이고 의미만 반대면 어법 문제 성립 안 됨!
 
 
 [⚠️ 핵심 원칙: "바로 옆 자리"는 모두 출제 금지 — 가장 중요!]
@@ -1122,7 +1124,12 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
    - 예: a person who (N)[think / thinks] differently (선행사 person 단수 → thinks)
    - 예: an operating process, which consciously (N)[attempt / attempts] to locate thoughts (선행사 process 단수 → attempts)
 5. 분사구문 능/수동
-6. 형용사 vs 부사 (수식 대상 분석 필요한 경우만)
+6. 형용사 vs 부사 (★ 내신 빈출): 같은 어근의 품사 차이로 출제 — 진짜 어법 문제!
+   - 예: This formula is (N)[accurate / accurately]. (be동사 보어 → 형용사)
+   - 예: She spoke (N)[clear / clearly] to the audience. (동사 수식 → 부사)
+   - 예: The book is surprisingly (N)[interesting / interestingly]. (be동사 보어 → 형용사)
+   - 핵심: 같은 어근 (accurate/accurately, clear/clearly, careful/carefully) 형태로 출제!
+   - ⚠ accurate/inaccurate 같은 의미 반대 어휘는 절대 어법 문제 아님!
 7. 혼동 수일치 (★ 내신 빈출): 부분/수량 표현, 도치문, 등위접속사 주어
    - 예: A number of students (N)[is / are] late. (= many students, 복수 취급)
    - 예: The number of students (N)[is / are] increasing. (= 학생들의 수, 단수 취급)
