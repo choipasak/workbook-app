@@ -12,7 +12,7 @@ STEP_VERSIONS = {
     "step5_grammar": "v4",
     "step6_vocab_content": "v3",
     "step7_writing": "v3",
-    "step8_answers": "v4",
+    "step8_answers": "v5",
     "secret_note_a": "v1",
     "secret_note_b": "v1",
     "secret_note_c": "v5",  # v5: 유의어 6-7개, 고난도 4-5개, 요지 2배 길이, 가로 배치
@@ -2322,10 +2322,11 @@ def step8_answers(all_data: dict, passage_dir: Path) -> dict:
     insert_data_8_B = ''.join(partB_items)
 
     blocks.append('<div class="ablock"><p class="ast">Stage 8 어휘</p>'
-                  '<p>[Part A]<p/>'
+                  '<p>[Part A]</p>'
                   f'<ul>{insert_data8_A}</ul>'
                   '<p>[Part B]</p>'
                   f'<ul>{insert_data_8_B}</ul>'
+                  '</div>'
                 )
 
     # Lv.9 - step2 정답 (정답: 번호만 / 오답: 번호+한글해석문장)
