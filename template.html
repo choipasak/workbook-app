@@ -1580,6 +1580,21 @@
                 padding-right: 15mm;
             }
 
+            /* 정답 페이지: print 모드에서 강제로 .page와 동일한 285mm 적용 (specificity 충돌 방지)
+               외부 정의(.page.page-answer { min-height: 285mm })가 이미 있지만, !important로 더 안전하게 처리 */
+            .page.page-answer {
+                min-height: 285mm !important;
+                page-break-after: always;
+                break-after: page;
+            }
+
+            /* 진짜 마지막 페이지(자바스크립트가 부여)만 콘텐츠 만큼만 + 빈 페이지 방지 */
+            .page.page-answer.page-last {
+                min-height: 0 !important;
+                page-break-after: avoid;
+                break-after: avoid;
+            }
+
             /* JS 페이지네이션이 screen/print 동일 height 기준으로 동작 → print 별도 override 불필요 */
 
             * {
