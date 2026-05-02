@@ -6,13 +6,13 @@ PIPELINE_VERSION = "v10"
 # Step별 버전 관리: 해당 step 코드 수정 시 버전만 올리면 캐시 자동 무효화
 STEP_VERSIONS = {
     "step1_basic": "v3",
-    "step2_order": "v4",
+    "step2_order": "v5",
     "step3_blank": "v3",
     "step4_topic": "v3",
-    "step5_grammar": "v5",
+    "step5_grammar": "v8",
     "step6_vocab_content": "v3",
     "step7_writing": "v3",
-    "step8_answers": "v6",
+    "step8_answers": "v8",
     "secret_note_a": "v1",
     "secret_note_b": "v1",
     "secret_note_c": "v5",  # v5: 유의어 6-7개, 고난도 4-5개, 요지 2배 길이, 가로 배치
@@ -619,16 +619,19 @@ def _generate_order_choices(data, passage: str = ""):
     else:
         correct = ("A", "B", "C")
     
-    # === 2. 선지 5개 생성 ===
-    all_perms = list(permutations(["A", "B", "C"]))
-    wrong = [p for p in all_perms if p != correct]
-    selected_wrong = random.sample(wrong, 4)
-    all_choices = [correct] + selected_wrong
-    random.shuffle(all_choices)
-    
+    # === 2. 선지 5개 고정 순서로 생성 (사용자 명시 요구) ===
+    # 1번부터 항상: ACB, BAC, BCA, CAB, CBA (ABC 제외)
+    # 정답은 라벨 셔플로 ABC가 절대 안 됨이 보장됨 → 항상 5개 중 하나
+    fixed_choices = [
+        ("A", "C", "B"),  # ① ACB
+        ("B", "A", "C"),  # ② BAC
+        ("B", "C", "A"),  # ③ BCA
+        ("C", "A", "B"),  # ④ CAB
+        ("C", "B", "A"),  # ⑤ CBA
+    ]
     choices = []
     answer = ""
-    for i, perm in enumerate(all_choices):
+    for i, perm in enumerate(fixed_choices):
         text = f"({perm[0]})-({perm[1]})-({perm[2]})"
         choices.append(f"{_CIRCLE_NUMS[i]} {text}")
         if perm == correct:
@@ -1032,6 +1035,132 @@ def step4_topic(passage: str, passage_dir: Path) -> dict:
 # STEP 5: Lv.8 어법
 # => Stage 7-1 어법 | Stage 7-2 어법 최종 체크
 # ============================================================
+def _apply_critical_grammar_filters(data: dict) -> dict:
+    """사용자 명시 절대 금지 자리들을 강제 제거 + 재번호 매기기.
+    재생성 후에도 잘못된 자리가 들어오는 걸 막기 위해 별도 함수로 분리."""
+    final_bp = data.get("grammar_bracket_passage", "")
+    if not final_bp:
+        return data
+
+    all_br = re.findall(r'\((\d+)\)\[([^\]]+)\]', final_bp)
+    removed = []
+
+    for num_str, content in all_br:
+        parts = [p.strip().lower() for p in content.split('/')]
+        if len(parts) != 2:
+            continue
+        a, b = parts[0], parts[1]
+        should_remove = False
+        reason = ""
+
+        # 1. 시제 차이 (의미 차이)
+        tense_pairs = [
+            {'is', 'was'}, {'are', 'were'}, {'am', 'was'},
+            {'has', 'had'}, {'have', 'had'},
+            {'do', 'did'}, {'does', 'did'},
+            {'go', 'went'}, {'goes', 'went'},
+            {'come', 'came'}, {'comes', 'came'},
+            {'see', 'saw'}, {'sees', 'saw'},
+            {'know', 'knew'}, {'knows', 'knew'},
+        ]
+        if {a, b} in tense_pairs:
+            should_remove = True
+            reason = f"시제 차이"
+
+        # 2. 진행시제 (be + V-ing) 포함
+        if not should_remove:
+            def _has_be_ing(s):
+                words = s.strip().split()
+                return (len(words) == 2 and
+                        words[0] in {'is', 'are', 'was', 'were', 'am', 'be', 'been', 'being'} and
+                        words[1].endswith('ing'))
+            if _has_be_ing(a) or _has_be_ing(b):
+                should_remove = True
+                reason = "진행시제 포함"
+
+        # 3. 주어 자리 동명사 vs to부정사
+        if not should_remove:
+            is_ing_to = False
+            if a.endswith('ing') and b.startswith('to ') and len(b.split()) == 2:
+                is_ing_to = True
+            elif b.endswith('ing') and a.startswith('to ') and len(a.split()) == 2:
+                is_ing_to = True
+            if is_ing_to:
+                bracket_pos = final_bp.find(f'({num_str})[')
+                if bracket_pos >= 0:
+                    last_punct = max(
+                        final_bp.rfind('.', 0, bracket_pos),
+                        final_bp.rfind('!', 0, bracket_pos),
+                        final_bp.rfind('?', 0, bracket_pos),
+                    )
+                    words_before = final_bp[max(0, last_punct + 1):bracket_pos].strip().split()
+                    if len(words_before) <= 3:
+                        should_remove = True
+                        reason = "주어자리 동명사/to부정사"
+
+        # 4. 관계대명사 that vs which
+        if not should_remove:
+            if {a, b} == {'that', 'which'}:
+                should_remove = True
+                reason = "that vs which"
+
+        # 5. 부정/긍정 조동사 (could/couldn't 등)
+        if not should_remove:
+            negation_pairs = [
+                {'could', "couldn't"}, {'can', "can't"}, {'will', "won't"},
+                {'would', "wouldn't"}, {'should', "shouldn't"},
+                {'may', "may not"}, {'must', "mustn't"},
+                {'has', "hasn't"}, {'have', "haven't"}, {'had', "hadn't"},
+                {'do', "don't"}, {'does', "doesn't"}, {'did', "didn't"},
+                {'is', "isn't"}, {'are', "aren't"},
+                {'was', "wasn't"}, {'were', "weren't"},
+            ]
+            if {a, b} in negation_pairs:
+                should_remove = True
+                reason = "부정/긍정 의미 차이"
+
+        if should_remove:
+            correct_word = ""
+            for ans in data.get("grammar_bracket_answers", []):
+                if ans.get("num") == int(num_str):
+                    correct_word = ans.get("answer", "")
+                    break
+            if not correct_word:
+                correct_word = content.split('/')[0].strip()
+            if correct_word:
+                final_bp = re.sub(r'\(' + num_str + r'\)\[[^\]]+\]', correct_word, final_bp)
+                removed.append(int(num_str))
+                _safe_print(f"  🚫 [재차단] 괄호({num_str}): {reason} → '{correct_word}'")
+
+    if removed:
+        data["grammar_bracket_passage"] = final_bp
+        data["grammar_bracket_answers"] = [a for a in data.get("grammar_bracket_answers", []) if a.get("num") not in removed]
+        data["grammar_bracket_count"] = len(re.findall(r'\(\d+\)\[', final_bp))
+
+    # 재번호 매기기 (1부터 시작)
+    remaining_nums = [int(m) for m in re.findall(r'\((\d+)\)\[', data.get("grammar_bracket_passage", ""))]
+    expected_nums = list(range(1, len(remaining_nums) + 1))
+    if remaining_nums and remaining_nums != expected_nums:
+        renumber_map = dict(zip(remaining_nums, expected_nums))
+        new_passage = data["grammar_bracket_passage"]
+        for old_num in remaining_nums:
+            new_num = renumber_map[old_num]
+            if old_num != new_num:
+                new_passage = new_passage.replace(f'({old_num})[', f'(__TMP{new_num}__)[', 1)
+        new_passage = re.sub(r'\(__TMP(\d+)__\)\[', lambda m: f'({m.group(1)})[', new_passage)
+        new_answers = []
+        for ans in data.get("grammar_bracket_answers", []):
+            old_n = ans.get("num", 0)
+            if old_n in renumber_map:
+                ans["num"] = renumber_map[old_n]
+                new_answers.append(ans)
+        data["grammar_bracket_passage"] = new_passage
+        data["grammar_bracket_answers"] = new_answers
+        data["grammar_bracket_count"] = len(new_answers)
+
+    return data
+
+
 def step5_grammar(passage: str, passage_dir: Path) -> dict:
     cached = load_step(passage_dir, "step5_grammar")
     if cached:
@@ -1040,8 +1169,20 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
 
     sentences = split_sentences(passage)
     sent_count = len(sentences)
+    word_count = len(passage.split())
     error_count = max(5, min(8, sent_count))  # 최소 5개, 최대 8개
+
+    # ★ 지문 길이에 따라 최소 괄호 수 동적 계산 (사용자 명시 요구)
+    #   박스 4줄(~80단어) → 최소 2개 / 6줄(~120단어) → 최소 3개 / 그 이상 → 최소 8개
+    if word_count <= 80:
+        min_brackets = 2
+    elif word_count <= 120:
+        min_brackets = 3
+    else:
+        min_brackets = 8
+
     bracket_count = min(14, sent_count * 2)  # 문장당 최대 2개 괄호, 최대 14개 (A4 페이지 넘침 방지)
+    _safe_print(f"  step5: 지문 {word_count}단어 / {sent_count}문장 → 최소 {min_brackets}개, 권장 {bracket_count}개")
     # bracket_count = sent_count * 2  # 문장당 최대 2개 괄호 / 예: 12문장이면 최대 24개 괄호 문제 + 24개 답안 박스가 생성됩니다.
     
     _safe_print("  step5: generating Lv.8 grammar...")
@@ -1223,6 +1364,15 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
    - 예: Insects function (N)[differently / different] from humans. (function 1형식 → 부사)
    - 예: She looks (N)[happy / happily]. (look 2형식 → 형용사)
    - 학생이 동사 형식 모르면 틀림 → 좋은 출제!
+17. ★★ one of + 복수명사 (★ 내신 빈출, 출제 자리 부족할 때 무조건 활용!): one of 뒤는 복수명사
+   - 예: one of the (N)[museums / museum] → 복수명사 (museums)
+   - 예: one of his (N)[friends / friend] → 복수명사 (friends)
+   - 예: one of the most popular (N)[dishes / dish] → 복수명사 (dishes)
+   - ⚠ 지문이 짧아서 출제 자리가 부족할 때 반드시 활용하세요!
+18. ★ 분사 능/수동 후치수식 (★ 내신 빈출): 명사 뒤 수식 분사의 능동/수동 구별
+   - 예: I ordered the dish (N)[called / calling] kibbeling. (수동 → called)
+   - 예: the children (N)[playing / played] in the park. (능동 → playing)
+   - 핵심: 수식 대상(명사)이 행위의 주체이면 능동(-ing), 대상이면 수동(p.p.)
 
 [⚠️ 추가 핵심 금지 — 명사 주어 바로 옆 수일치]
 단복수 차이 쌍 (X / Xs 형태: confirm/confirms, factor/factors, cause/causes 등)은 주어가 멀리 있을 때만 출제 가능!
@@ -1236,7 +1386,7 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
 → 학생이 1초 안에 풀 수 있는 자리는 무조건 피하세요.
 [어법 괄호형 Lv.8-1]
 - 원문 {sent_count}개 문장 모두 포함 (출제 안 하는 문장도 원문 그대로)
-- ⚠️ 괄호 최소 8개, 가능하면 {bracket_count}개 (8개 미만이면 출제 실패!)
+- ⚠️ 괄호 최소 {min_brackets}개, 가능하면 {bracket_count}개 (지문이 짧으면 {min_brackets}개도 OK!)
 - 우선순위 자리가 부족하면 다른 어법 자리도 활용해서 반드시 8개는 채울 것
 - 괄호 형식: (N)[정답 / 오답] (N: 문제 번호 숫자)
 - 예시: (1)[looked / look]
@@ -1843,7 +1993,7 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
             data["grammar_bracket_count"] = len(re.findall(r'\(\d+\)\[', final_bp_neg))
             _safe_print(f"  ✅ 의미 차이 괄호 {len(removed_neg)}개 제거 완료")
 
-    # ★ 추가 자동 제거: 시제 차이 / 주어자리 동명사·to부정사 / 관계대명사 that-which 쌍
+    # ★ 추가 자동 제거: 시제 차이 / 주어자리 동명사·to부정사 / 관계대명사 that-which 쌍 / 진행시제
     final_bp_extra = data.get("grammar_bracket_passage", "")
     if final_bp_extra:
         all_br_extra = re.findall(r'\((\d+)\)\[([^\]]+)\]', final_bp_extra)
@@ -1870,38 +2020,44 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
                 should_remove = True
                 reason = f"시제 차이 (의미 차이): {a}/{b}"
 
-            # 2. 주어자리 동명사 vs to부정사 (X-ing / to X 어근 같음)
+            # ★ 1-2. 진행시제 (be + V-ing) 페어 차단
+            # 한쪽이 "is/are/was/were/am + V-ing" 형태 + 다른 쪽이 단순 동사 → 진행 vs 단순 시제 차이
+            # 예: "was taking" / "took", "is studying" / "studies"
             if not should_remove:
-                ing_word, to_word = None, None
-                if a.endswith('ing') and b.startswith('to '):
-                    ing_word, to_word = a, b
-                elif b.endswith('ing') and a.startswith('to '):
-                    ing_word, to_word = b, a
-                if ing_word and to_word:
-                    ing_root = ing_word[:-3].rstrip('e')  # studying → study
-                    to_root = to_word[3:].strip()  # to study → study
-                    # 어근 비교 (앞 3글자 또는 완전 일치)
-                    if (ing_root and to_root and
-                        (ing_root[:3] == to_root[:3] or ing_root == to_root)):
-                        # 위치 확인: 문장 시작 부근이면 주어 자리
-                        bracket_pos = final_bp_extra.find(f'({num_str})[')
-                        if bracket_pos >= 0:
-                            last_punct = max(
-                                final_bp_extra.rfind('.', 0, bracket_pos),
-                                final_bp_extra.rfind('!', 0, bracket_pos),
-                                final_bp_extra.rfind('?', 0, bracket_pos),
-                            )
-                            words_before = final_bp_extra[max(0, last_punct + 1):bracket_pos].strip().split()
-                            # 문장 시작 ~ 3단어 이내면 주어 자리로 간주
-                            if len(words_before) <= 3:
-                                should_remove = True
-                                reason = f"주어자리 동명사 vs to부정사 (둘 다 가능): {a}/{b}"
+                def _has_be_ing(s):
+                    words = s.strip().split()
+                    return (len(words) == 2 and
+                            words[0] in {'is', 'are', 'was', 'were', 'am', 'be', 'been', 'being'} and
+                            words[1].endswith('ing'))
+                if _has_be_ing(a) or _has_be_ing(b):
+                    should_remove = True
+                    reason = f"진행시제 포함 (어법 X, 의미 차이): {a}/{b}"
+
+            # 2. 주어자리 동명사 vs to부정사 (X-ing / to X) — 어근 비교 없이 패턴만 체크
+            if not should_remove:
+                is_ing_to_pair = False
+                if a.endswith('ing') and b.startswith('to ') and len(b.split()) == 2:
+                    is_ing_to_pair = True
+                elif b.endswith('ing') and a.startswith('to ') and len(a.split()) == 2:
+                    is_ing_to_pair = True
+                if is_ing_to_pair:
+                    # 위치 확인: 문장 시작 부근이면 주어 자리
+                    bracket_pos = final_bp_extra.find(f'({num_str})[')
+                    if bracket_pos >= 0:
+                        last_punct = max(
+                            final_bp_extra.rfind('.', 0, bracket_pos),
+                            final_bp_extra.rfind('!', 0, bracket_pos),
+                            final_bp_extra.rfind('?', 0, bracket_pos),
+                        )
+                        words_before = final_bp_extra[max(0, last_punct + 1):bracket_pos].strip().split()
+                        # 문장 시작 ~ 3단어 이내면 주어 자리로 간주
+                        if len(words_before) <= 3:
+                            should_remove = True
+                            reason = f"주어자리 동명사 vs to부정사 (둘 다 가능): {a}/{b}"
 
             # 3. 관계대명사 that vs which 쌍 (사용자 명시 금지 자리)
             if not should_remove:
                 if {a, b} == {'that', 'which'}:
-                    # 괄호 앞 단어 확인 - 명사(선행사)인 경우 관계대명사
-                    # 단순화: 그냥 모두 차단 (사용자 명시 요구)
                     should_remove = True
                     reason = f"관계대명사 자리 that vs which (둘 다 가능): {a}/{b}"
 
@@ -2023,15 +2179,15 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
             data["grammar_bracket_count"] = len(new_answers)
             _safe_print(f"  🔢 최종 재번호 매기기 완료: {dict(list(renumber_map.items())[:5])}...")
 
-  # ★ 최종 괄호 수 체크: 모든 제거 후 8개 미만이면 재생성 (최대 3회)
+  # ★ 최종 괄호 수 체크: 모든 제거 후 min_brackets 미만이면 재생성 (최대 3회)
     final_bracket_count = data.get("grammar_bracket_count", 0)
-    if 0 < final_bracket_count < 8:
+    if 0 < final_bracket_count < min_brackets:
         for _retry_n in range(3):
-            _safe_print(f"  ⚠️ 최종 괄호 {final_bracket_count}개 < 8개 → 재생성 시도 {_retry_n+1}/3...")
+            _safe_print(f"  ⚠️ 최종 괄호 {final_bracket_count}개 < {min_brackets}개 → 재생성 시도 {_retry_n+1}/3...")
             data_retry = call_claude_json(SYS_JSON, prompt, max_tokens=4000)
             retry_bp = data_retry.get("grammar_bracket_passage", "")
             retry_count = len(re.findall(r'\(\d+\)\[', retry_bp))
-            if retry_count >= 8:
+            if retry_count >= min_brackets:
                 data["grammar_bracket_passage"] = retry_bp
                 data["grammar_bracket_answers"] = data_retry.get("grammar_bracket_answers", [])
                 data["grammar_bracket_count"] = retry_count
@@ -2039,9 +2195,16 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
                 data["grammar_error_answers"] = data_retry.get("grammar_error_answers", data.get("grammar_error_answers", []))
                 data["grammar_error_count"] = len(data["grammar_error_answers"])
                 _safe_print(f"  ✅ 재생성 성공: 괄호 {retry_count}개")
+                # ★★ 재생성 결과에도 핵심 차단 다시 적용 (시제/주어동명사/that-which 등)
+                data = _apply_critical_grammar_filters(data)
+                _safe_print(f"  🔒 재생성 후 차단 적용 → 최종 {data.get('grammar_bracket_count', 0)}개")
                 break
             final_bracket_count = retry_count
             _safe_print(f"  ⚠ 재생성 {_retry_n+1}회 실패 ({retry_count}개)")
+
+    # ★★ 최종 안전장치: 항상 핵심 차단 한 번 더 (캐시되기 전)
+    data = _apply_critical_grammar_filters(data)
+
     save_step(passage_dir, "step5_grammar", data)
     return data
 
