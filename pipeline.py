@@ -1791,7 +1791,7 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
         remaining_nums = [int(m) for m in re.findall(r'\((\d+)\)\[', final_bp_renum)]
         expected_nums = list(range(1, len(remaining_nums) + 1))
         if remaining_nums and remaining_nums != expected_nums:
-            renumber_map = {old: new for new, old in zip(remaining_nums, expected_nums)}
+            renumber_map = dict(zip(remaining_nums, expected_nums))
             new_passage = final_bp_renum
             # 1단계: 임시 마커로 교체 (충돌 방지)
             for old_num in remaining_nums:
