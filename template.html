@@ -71,11 +71,12 @@
             break-after: avoid;
         }
 
-        /* 정답 페이지: 합본 시 중간 정답 페이지도 한 장(297mm) 차지하도록 명시 */
+        /* 정답 페이지: 합본 시 중간 정답 페이지도 한 장 차지하도록 명시
+           min-height: 285mm — @media print의 .page와 일치시켜 초과분으로 인한 빈 페이지 방지 */
         .page.page-answer {
             page-break-after: always;
             break-after: page;
-            min-height: 297mm;
+            min-height: 285mm;
         }
 
         /* 진짜 마지막 페이지(자바스크립트가 부여)만 빈 페이지 방지 */
