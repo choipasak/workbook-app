@@ -71,9 +71,17 @@
             break-after: avoid;
         }
 
-        /* 정답 페이지: 콘텐츠 양만큼만 차지 (빈 페이지 방지)
-           합본 시에도 항상 적용되도록 .page-last와 별개의 클래스 */
+        /* 정답 페이지: 합본 시 중간 정답 페이지도 한 장(297mm) 차지하도록 명시 */
         .page.page-answer {
+            page-break-after: always;
+            break-after: page;
+            min-height: 297mm;
+        }
+
+        /* 진짜 마지막 페이지(자바스크립트가 부여)만 빈 페이지 방지 */
+        .page.page-answer.page-last {
+            page-break-after: avoid;
+            break-after: avoid;
             min-height: 0;
         }
 
@@ -2442,7 +2450,7 @@
 
     {% if not levels or 0 in levels %}
     {# ==================== 정답 및 해설 ==================== #}
-    <div class="page page-last page-answer">
+    <div class="page page-answer">
         <div class="page-head">
             <div class="page-header"><span class="page-header-left">레벨미업학원</span><span>정답 및 해설</span></div>
         </div>
