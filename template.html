@@ -2470,8 +2470,7 @@
         </div>
         <div class="page-content">
             <div class="content-block">
-                <div class="ans-heading text-center text-bold mt6 mb6">정답 및 해설</div>
-                <div class="answer-page">{{ answers_html }}</div>
+                <div class="answer-page">{{ answers_html | safe }}</div>
             </div>
         </div>
     </div>
