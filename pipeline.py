@@ -1561,22 +1561,25 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
             data["grammar_bracket_answers"] = [a for a in data.get("grammar_bracket_answers", []) if a.get("num") not in removed_ww]
             data["grammar_bracket_count"] = len(re.findall(r'\(\d+\)\[', final_bp3))
 
-    # ★ 최종 괄호 수 체크: 모든 제거 후 8개 미만이면 재생성
+  # ★ 최종 괄호 수 체크: 모든 제거 후 8개 미만이면 재생성 (최대 3회)
     final_bracket_count = data.get("grammar_bracket_count", 0)
     if 0 < final_bracket_count < 8:
-        _safe_print(f"  ⚠️ 최종 괄호 {final_bracket_count}개 < 8개 → 재생성 시도...")
-        data_retry = call_claude_json(SYS_JSON, prompt, max_tokens=4000)
-        retry_bp = data_retry.get("grammar_bracket_passage", "")
-        retry_count = len(re.findall(r'\(\d+\)\[', retry_bp))
-        if retry_count >= 8:
-            data["grammar_bracket_passage"] = retry_bp
-            data["grammar_bracket_answers"] = data_retry.get("grammar_bracket_answers", [])
-            data["grammar_bracket_count"] = retry_count
-            data["grammar_error_passage"] = data_retry.get("grammar_error_passage", data.get("grammar_error_passage", ""))
-            data["grammar_error_answers"] = data_retry.get("grammar_error_answers", data.get("grammar_error_answers", []))
-            data["grammar_error_count"] = len(data["grammar_error_answers"])
-            _safe_print(f"  ✅ 재생성 성공: 괄호 {retry_count}개")
-
+        for _retry_n in range(3):
+            _safe_print(f"  ⚠️ 최종 괄호 {final_bracket_count}개 < 8개 → 재생성 시도 {_retry_n+1}/3...")
+            data_retry = call_claude_json(SYS_JSON, prompt, max_tokens=4000)
+            retry_bp = data_retry.get("grammar_bracket_passage", "")
+            retry_count = len(re.findall(r'\(\d+\)\[', retry_bp))
+            if retry_count >= 8:
+                data["grammar_bracket_passage"] = retry_bp
+                data["grammar_bracket_answers"] = data_retry.get("grammar_bracket_answers", [])
+                data["grammar_bracket_count"] = retry_count
+                data["grammar_error_passage"] = data_retry.get("grammar_error_passage", data.get("grammar_error_passage", ""))
+                data["grammar_error_answers"] = data_retry.get("grammar_error_answers", data.get("grammar_error_answers", []))
+                data["grammar_error_count"] = len(data["grammar_error_answers"])
+                _safe_print(f"  ✅ 재생성 성공: 괄호 {retry_count}개")
+                break
+            final_bracket_count = retry_count
+            _safe_print(f"  ⚠ 재생성 {_retry_n+1}회 실패 ({retry_count}개)")
     save_step(passage_dir, "step5_grammar", data)
     return data
 
