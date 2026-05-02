@@ -71,6 +71,12 @@
             break-after: avoid;
         }
 
+        /* 정답 페이지: 콘텐츠 양만큼만 차지 (빈 페이지 방지)
+           합본 시에도 항상 적용되도록 .page-last와 별개의 클래스 */
+        .page.page-answer {
+            min-height: 0;
+        }
+
 
         .page-head {
             flex-shrink: 0;
@@ -2436,7 +2442,7 @@
 
     {% if not levels or 0 in levels %}
     {# ==================== 정답 및 해설 ==================== #}
-    <div class="page page-last">
+    <div class="page page-last page-answer">
         <div class="page-head">
             <div class="page-header"><span class="page-header-left">레벨미업학원</span><span>정답 및 해설</span></div>
         </div>
