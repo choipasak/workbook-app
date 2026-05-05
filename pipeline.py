@@ -7,6 +7,7 @@ PIPELINE_VERSION = "v10"
 STEP_VERSIONS = {
     "step1_basic": "v3",
     "step2_order": "v7",
+    "step3_blank": "v5",
     "step4_topic": "v3",
     "step5_grammar": "v10",
     "step6_vocab_content": "v5",
