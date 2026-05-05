@@ -1473,8 +1473,9 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
 - 예: Our dominant hand (N)[factor / factors] → hand 바로 앞 → 금지!
 - 출제하려면 반드시 주어와 동사 사이가 5단어 이상 떨어진 자리만!
 
-→ 학생이 1초 안에 풀 수 있는 자리는 무조건 피하세요.
+→ (제일 중요)학생이 1초 안에 풀 수 있는 자리는 무조건 피하세요.
 [어법 괄호형 Lv.8-1]
+- (제일 중요)정답을 고르는 기준은 위의 문법 규칙에 대한 내용들을 반드시 따를 것.
 - ⚠️⚠️⚠️ {bracket_count} 개수 절대 규칙: 반드시 {min_brackets}개 이상! 지문 길이별 강제:
    - 짧은 지문(80단어 이하) → 최소 2개 (그 이상도 가능)
    - 중간 지문(81~120단어) → 최소 3개
@@ -1482,13 +1483,12 @@ def step5_grammar(passage: str, passage_dir: Path) -> dict:
 - 우선순위 자리가 부족해도 위에 명시한 19~22번 자리(분사구문, couldn't help but, recommend ing, be 형용사)를 활용해서 충분히 채우세요
 - ⚠ 괄호가 너무 적으면(긴 지문에서 5개 미만) 출제 실패!
 - 한 문장에 여러 문제 삽입 가능
-- 정답이 왼쪽인 경우 50%, 오른쪽인 경우 50%가 되도록 반드시 균등 배치 (예: 10개면 5개는 정답이 왼쪽, 5개는 오른쪽)
 - 출제: 시제, 대명사, 동명사, to부정사, 형용사/부사, 관계대명사, 분사, 사역동사 등
-- 8-1 출제 분배 — 반드시 이대로 개수 맞출 것
+- 8-1 출제 분배(반드시 이대로 개수 맞출 것)
 {bracket_dist_lines}
     - 합계: {bracket_count}개
     - 0개로 지정된 문장은 그냥 문장만 응답함. (8-2와는 무관)
-- 8-1의 grammar_bracket_passage 응답 형식(매우 중요)]
+- 8-1의 grammar_bracket_passage 응답 형식(매우 중요)
     - grammar_bracket_passage 필드는 ★list of triples★. 문자열 아님!
     - 형식: [[원문 문장(sentences[i] 그대로), 정답 단어/구, 오답 단어/구], ...]
     - 각 triple의 [0]은 원문 문장과 글자 단위로 정확히 동일해야 함 (변형/축약 금지)
